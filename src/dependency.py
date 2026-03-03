@@ -32,7 +32,6 @@ async def has_access(credentials: HTTPAuthorizationCredentials = Depends(securit
         payload = jwt.decode(token,
                              key=api_secret_bytes,  # need to use bytes
                              algorithms=["HS256"])
-        print("payload => ", payload)
     except JOSEError as e:  # catches any exception
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
