@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from src.endpoints import hello, health
@@ -5,14 +7,12 @@ from src.dependency import has_access
 
 app = FastAPI()
 
+_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:4200")
+allowed_origins = [o.strip() for o in _origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:4200",
-        "https://regmibishal1.github.io",
-        "https://auth.bishalregmi.com",
-        "https://api.bishalregmi.com",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
