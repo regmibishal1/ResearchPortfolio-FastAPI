@@ -7,7 +7,12 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200", "https://regmibishal1.github.io"],
+    allow_origins=[
+        "http://localhost:4200",
+        "https://regmibishal1.github.io",
+        "https://auth.bishalregmi.com",
+        "https://api.bishalregmi.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
