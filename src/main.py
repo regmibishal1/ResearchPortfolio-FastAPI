@@ -2,7 +2,7 @@ import os
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from src.endpoints import hello, health
+from src.endpoints import hello, health, stats
 from src.dependency import has_access
 
 app = FastAPI()
@@ -29,4 +29,11 @@ app.include_router(
 
 app.include_router(
     health.router
+)
+
+# Public endpoints — no auth required
+app.include_router(
+    stats.router,
+    prefix="/stats",
+    tags=["stats"],
 )
