@@ -23,7 +23,8 @@ Planned: research/ML inference endpoints backing the portfolio's interactive dem
 
 | Var | Purpose |
 |---|---|
-| `RP_API_SEC_TOKEN` | Base64 HS256 secret (must match AuthAPI) |
+| `RP_FASTAPI_JWT_SECRET` | Base64 HS256 secret — must match `RP_AUTHAPI_JWT_SECRET` in AuthAPI |
+| `RP_ADMIN_TOKEN` | Static bearer token for admin-only endpoints; never exposed to the UI |
 
 ## Local development
 
@@ -32,7 +33,8 @@ python -m venv venv
 source venv/bin/activate           # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
 
-export RP_API_SEC_TOKEN=...         # same value as AuthAPI
+export RP_FASTAPI_JWT_SECRET=...   # same value as RP_AUTHAPI_JWT_SECRET in AuthAPI
+export RP_ADMIN_TOKEN=...          # openssl rand -base64 48
 uvicorn src.main:app --reload --port 8000
 ```
 
@@ -40,7 +42,10 @@ uvicorn src.main:app --reload --port 8000
 
 ```bash
 docker build -t researchportfolio-fastapi .
-docker run --rm -p 8000:8000 -e RP_API_SEC_TOKEN=... researchportfolio-fastapi
+docker run --rm -p 8000:8000 \
+  -e RP_FASTAPI_JWT_SECRET=... \
+  -e RP_ADMIN_TOKEN=... \
+  researchportfolio-fastapi
 ```
 
 In production this runs via the top-level `docker-compose.yml` alongside the AuthAPI, PostgreSQL, and `cloudflared`.
