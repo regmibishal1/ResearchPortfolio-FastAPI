@@ -1,9 +1,16 @@
+import logging
 import os
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from src.endpoints import hello, health, stats
 from src.dependency import has_access
+from src.logging_config import setup_logging
+from src.middleware import RequestLoggingMiddleware
+
+# Initialise structured logging before the app is created so that startup
+# messages (e.g. Uvicorn's "Application startup complete") are formatted too.
+setup_logging(level=logging.DEBUG if os.getenv("DEBUG") else logging.INFO)
 
 app = FastAPI()
 
@@ -17,6 +24,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# RequestLoggingMiddleware is added last so Starlette's LIFO ordering makes it
+# run outermost — it sees every request before CORS and every response after.
+app.add_middleware(RequestLoggingMiddleware)
 
 # routes
 PROTECTED = [Depends(has_access)]
