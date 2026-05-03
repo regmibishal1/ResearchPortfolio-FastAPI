@@ -4,7 +4,7 @@ import os
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from src.endpoints import hello, health, stats
-from src.dependency import has_access
+from src.dependency import has_access, has_api_key
 from src.logging_config import setup_logging
 from src.middleware import RequestLoggingMiddleware
 
@@ -42,9 +42,12 @@ app.include_router(
     health.router
 )
 
-# Public endpoints — no auth required
+# Semi-public endpoints — API key required (shared with Angular UI).
+# Not user-auth (no login needed), but prevents anonymous bot abuse of
+# CPU-intensive sampling endpoints.
 app.include_router(
     stats.router,
     prefix="/stats",
     tags=["stats"],
+    dependencies=[Depends(has_api_key)],
 )
