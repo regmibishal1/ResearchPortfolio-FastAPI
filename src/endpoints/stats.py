@@ -1,8 +1,11 @@
+import logging
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import Literal
 import numpy as np
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 DISTRIBUTIONS = Literal["normal", "uniform", "exponential", "beta", "binomial", "poisson"]
@@ -84,6 +87,13 @@ async def sample_distribution(request: SampleRequest):
     Sample from a statistical distribution and return histogram bins + summary stats.
     Public endpoint — no authentication required.
     """
+    logger.info(
+        "sample_distribution distribution=%s n=%d bins=%d params=%s",
+        request.distribution,
+        request.n_samples,
+        request.n_bins,
+        request.params,
+    )
     samples = _generate(request.distribution, request.params, request.n_samples)
 
     counts, edges = np.histogram(samples, bins=request.n_bins)
