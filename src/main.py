@@ -3,8 +3,8 @@ import os
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from src.endpoints import hello, health, stats, worldcup
-from src.dependency import has_access, has_api_key
+from src.endpoints import hello, health, stats, worldcup, worldcup_admin
+from src.dependency import has_access, has_admin_access, has_api_key
 from src.logging_config import setup_logging
 from src.middleware import RequestLoggingMiddleware
 
@@ -60,4 +60,16 @@ app.include_router(
     prefix="/worldcup",
     tags=["worldcup"],
     dependencies=[Depends(has_api_key)],
+)
+
+# World Cup 2026 admin — write endpoint used by the prediction pipeline
+# runners (workstation or NAS container). Gated by the admin bearer
+# token and authenticates as worldcup_writer for DB writes. Mounted as a
+# separate router so the read endpoints can never accidentally get the
+# writer credentials wired into their request scope.
+app.include_router(
+    worldcup_admin.router,
+    prefix="/worldcup",
+    tags=["worldcup-admin"],
+    dependencies=[Depends(has_admin_access)],
 )
