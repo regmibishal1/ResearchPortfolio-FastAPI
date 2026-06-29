@@ -41,3 +41,9 @@ ujson==5.9.0
 uvicorn==0.29.0
 watchfiles==0.21.0
 websockets==12.0
+SQLAlchemy==2.0.30
+asyncpg==0.29.0
+psycopg[binary]==3.1.18
+alembic==1.13.1
+APScheduler==3.10.4
+greenlet==3.0.3
