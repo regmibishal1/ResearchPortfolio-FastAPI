@@ -3,7 +3,7 @@ import os
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from src.endpoints import hello, health, stats
+from src.endpoints import hello, health, stats, worldcup
 from src.dependency import has_access, has_api_key
 from src.logging_config import setup_logging
 from src.middleware import RequestLoggingMiddleware
@@ -49,5 +49,15 @@ app.include_router(
     stats.router,
     prefix="/stats",
     tags=["stats"],
+    dependencies=[Depends(has_api_key)],
+)
+
+# World Cup 2026 — read-only endpoints backed by the worldcup Postgres
+# schema. Same API-key gate as /stats; database connection authenticates
+# as worldcup_reader (SELECT-only role).
+app.include_router(
+    worldcup.router,
+    prefix="/worldcup",
+    tags=["worldcup"],
     dependencies=[Depends(has_api_key)],
 )
