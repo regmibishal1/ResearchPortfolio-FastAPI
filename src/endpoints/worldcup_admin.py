@@ -46,6 +46,19 @@ class IngestTeamProb(BaseModel):
     elo: float
 
 
+class MatchDetail(BaseModel):
+    """Per-match scoreline record. Predicted score always present (from the
+    Poisson xG solver); actual_score + winner + went_to_penalties only
+    populated for knockout matches that have been played.
+    """
+    teams: list[str] = Field(min_length=2, max_length=2)
+    predicted_score: list[int] = Field(min_length=2, max_length=2)
+    played: bool = False
+    actual_score: list[int] | None = None
+    went_to_penalties: bool = False
+    winner: str | None = None
+
+
 class IngestBracket(BaseModel):
     group_winners: dict[str, list[str]]
     best_thirds: list[str]
@@ -55,6 +68,10 @@ class IngestBracket(BaseModel):
     sf: list[list[str]]
     final_pair: list[str]
     champion: str = Field(min_length=1, max_length=64)
+    # Per-round per-match scoreline details. Keyed by round name
+    # ('R32'/'R16'/'QF'/'SF'/'Final'). Optional to keep the endpoint
+    # backwards-compatible with older snapshot pushes.
+    match_details: dict[str, list[MatchDetail]] | None = None
 
 
 class IngestPlayedMatch(BaseModel):
@@ -162,16 +179,28 @@ async def ingest_snapshot(
 
             # --- 4. Bracket ---
             b = payload.bracket
+            # Serialize match_details Pydantic models to plain dicts for JSONB
+            # storage. None if the payload didn't include them (old snapshots).
+            if b.match_details is None:
+                md_json = None
+            else:
+                md_json = _json(
+                    {
+                        round_name: [m.model_dump() for m in matches]
+                        for round_name, matches in b.match_details.items()
+                    }
+                )
             await db.execute(
                 text(
                     """
                     INSERT INTO worldcup.brackets
                         (run_id, group_winners, best_thirds, r32, r16, qf, sf,
-                         final_pair, champion)
+                         final_pair, champion, match_details)
                     VALUES (:rid, CAST(:gw AS jsonb), CAST(:bt AS jsonb),
                             CAST(:r32 AS jsonb), CAST(:r16 AS jsonb),
                             CAST(:qf AS jsonb), CAST(:sf AS jsonb),
-                            CAST(:fp AS jsonb), :champ)
+                            CAST(:fp AS jsonb), :champ,
+                            CAST(:md AS jsonb))
                     """
                 ),
                 {
@@ -184,6 +213,7 @@ async def ingest_snapshot(
                     "sf": _json(b.sf),
                     "fp": _json(b.final_pair),
                     "champ": b.champion,
+                    "md": md_json,
                 },
             )
 

@@ -132,6 +132,11 @@ class WorldCupBracket(Base):
     # Stored as a 2-element array: [team1, team2]
     final_pair: Mapped[list] = mapped_column("final_pair", JSONB, nullable=False)
     champion: Mapped[str] = mapped_column(String(64), nullable=False)
+    # Per-round per-match scoreline details. Keyed by round name
+    # ('R32'/'R16'/'QF'/'SF'/'Final'); each value is a list of records
+    # like {teams, predicted_score, played, actual_score, went_to_penalties, winner}.
+    # Nullable so old snapshots that predate score prediction still load.
+    match_details: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     run: Mapped["WorldCupRun"] = relationship(back_populates="bracket")
 

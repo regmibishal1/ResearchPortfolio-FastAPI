@@ -62,6 +62,15 @@ class LatestResponse(BaseModel):
     leaderboard: list[TeamRow]
 
 
+class MatchDetail(BaseModel):
+    teams: list[str]
+    predicted_score: list[int]
+    played: bool = False
+    actual_score: list[int] | None = None
+    went_to_penalties: bool = False
+    winner: str | None = None
+
+
 class BracketResponse(BaseModel):
     run_id: int
     as_of_date: date
@@ -74,6 +83,9 @@ class BracketResponse(BaseModel):
     sf: list[list[str]]
     final_pair: list[str]
     champion: str
+    # Per-round per-match scoreline records. None for old snapshots that
+    # were pushed before the ingest endpoint accepted match_details.
+    match_details: dict[str, list[MatchDetail]] | None = None
 
 
 class HistoryPoint(BaseModel):
@@ -226,6 +238,7 @@ async def get_bracket(
         sf=bracket.sf,
         final_pair=bracket.final_pair,
         champion=bracket.champion,
+        match_details=bracket.match_details,
     )
 
 
