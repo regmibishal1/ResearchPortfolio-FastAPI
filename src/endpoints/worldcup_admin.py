@@ -9,10 +9,11 @@ Endpoints
 POST /worldcup/ingest    push a snapshot from a remote pipeline runner
 """
 
+import json
 import logging
 from datetime import date, datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -135,135 +136,126 @@ async def ingest_snapshot(
         len(payload.played_matches),
     )
 
-    try:
-        async with db.begin():
-            # --- 1. Upsert the run row ---
-            result = await db.execute(
-                text(
-                    """
-                    INSERT INTO worldcup.runs
-                        (tournament_key, as_of_date, label, n_simulations,
-                         n_played_matches_locked, run_timestamp_utc, metadata)
-                    VALUES (:tk, :date, :label, :nsim, :nplay, :ts, '{}'::jsonb)
-                    ON CONFLICT (tournament_key, as_of_date, label) DO UPDATE
-                        SET n_simulations           = EXCLUDED.n_simulations,
-                            n_played_matches_locked = EXCLUDED.n_played_matches_locked,
-                            run_timestamp_utc       = EXCLUDED.run_timestamp_utc
-                    RETURNING id
-                    """
-                ),
-                {
-                    "tk": payload.meta.tournament_key,
-                    "date": payload.meta.as_of_date,
-                    "label": payload.meta.label,
-                    "nsim": payload.meta.n_simulations,
-                    "nplay": payload.meta.n_played_matches_locked,
-                    "ts": payload.meta.run_timestamp_utc,
-                },
+    async with db.begin():
+        # --- 1. Upsert the run row ---
+        result = await db.execute(
+            text(
+                """
+                INSERT INTO worldcup.runs
+                    (tournament_key, as_of_date, label, n_simulations,
+                     n_played_matches_locked, run_timestamp_utc, metadata)
+                VALUES (:tk, :date, :label, :nsim, :nplay, :ts, '{}'::jsonb)
+                ON CONFLICT (tournament_key, as_of_date, label) DO UPDATE
+                    SET n_simulations           = EXCLUDED.n_simulations,
+                        n_played_matches_locked = EXCLUDED.n_played_matches_locked,
+                        run_timestamp_utc       = EXCLUDED.run_timestamp_utc
+                RETURNING id
+                """
+            ),
+            {
+                "tk": payload.meta.tournament_key,
+                "date": payload.meta.as_of_date,
+                "label": payload.meta.label,
+                "nsim": payload.meta.n_simulations,
+                "nplay": payload.meta.n_played_matches_locked,
+                "ts": payload.meta.run_timestamp_utc,
+            },
+        )
+        run_id: int = result.scalar_one()
+
+        # --- 2. Replace satellite tables for this run ---
+        for table in ("team_probabilities", "brackets", "played_matches"):
+            await db.execute(
+                text(f"DELETE FROM worldcup.{table} WHERE run_id = :rid"),
+                {"rid": run_id},
             )
-            run_id: int = result.scalar_one()
 
-            # --- 2. Replace satellite tables for this run ---
-            for table in ("team_probabilities", "brackets", "played_matches"):
-                await db.execute(
-                    text(f"DELETE FROM worldcup.{table} WHERE run_id = :rid"),
-                    {"rid": run_id},
-                )
+        # --- 3. Team probabilities ---
+        team_rows = [
+            {
+                "rid": run_id,
+                "team": p.team,
+                "win": p.winner_pct, "fin": p.final_pct, "sf": p.sf_pct,
+                "qf": p.qf_pct, "r16": p.r16_pct, "r32": p.r32_pct,
+                "elo": p.elo,
+            }
+            for p in payload.team_probabilities
+        ]
+        await db.execute(
+            text(
+                """
+                INSERT INTO worldcup.team_probabilities
+                    (run_id, team, winner_pct, final_pct, sf_pct,
+                     qf_pct, r16_pct, r32_pct, elo)
+                VALUES (:rid, :team, :win, :fin, :sf, :qf, :r16, :r32, :elo)
+                """
+            ),
+            team_rows,
+        )
 
-            # --- 3. Team probabilities ---
-            team_rows = [
+        # --- 4. Bracket ---
+        b = payload.bracket
+        # Serialize match_details Pydantic models to plain dicts for JSONB
+        # storage. None if the payload didn't include them (old snapshots).
+        if b.match_details is None:
+            md_json = None
+        else:
+            md_json = _json(
+                {
+                    round_name: [m.model_dump() for m in matches]
+                    for round_name, matches in b.match_details.items()
+                }
+            )
+        await db.execute(
+            text(
+                """
+                INSERT INTO worldcup.brackets
+                    (run_id, group_winners, best_thirds, r32, r16, qf, sf,
+                     final_pair, champion, match_details)
+                VALUES (:rid, CAST(:gw AS jsonb), CAST(:bt AS jsonb),
+                        CAST(:r32 AS jsonb), CAST(:r16 AS jsonb),
+                        CAST(:qf AS jsonb), CAST(:sf AS jsonb),
+                        CAST(:fp AS jsonb), :champ,
+                        CAST(:md AS jsonb))
+                """
+            ),
+            {
+                "rid": run_id,
+                "gw": _json(b.group_winners),
+                "bt": _json(b.best_thirds),
+                "r32": _json(b.r32),
+                "r16": _json(b.r16),
+                "qf": _json(b.qf),
+                "sf": _json(b.sf),
+                "fp": _json(b.final_pair),
+                "champ": b.champion,
+                "md": md_json,
+            },
+        )
+
+        # --- 5. Played matches (optional) ---
+        if payload.played_matches:
+            match_rows = [
                 {
                     "rid": run_id,
-                    "team": p.team,
-                    "win": p.winner_pct, "fin": p.final_pct, "sf": p.sf_pct,
-                    "qf": p.qf_pct, "r16": p.r16_pct, "r32": p.r32_pct,
-                    "elo": p.elo,
+                    "md": m.match_date,
+                    "h": m.home_team, "a": m.away_team,
+                    "hs": m.home_score, "as": m.away_score,
+                    "g": m.group_name,
                 }
-                for p in payload.team_probabilities
+                for m in payload.played_matches
             ]
             await db.execute(
                 text(
                     """
-                    INSERT INTO worldcup.team_probabilities
-                        (run_id, team, winner_pct, final_pct, sf_pct,
-                         qf_pct, r16_pct, r32_pct, elo)
-                    VALUES (:rid, :team, :win, :fin, :sf, :qf, :r16, :r32, :elo)
+                    INSERT INTO worldcup.played_matches
+                        (run_id, match_date, home_team, away_team,
+                         home_score, away_score, group_name)
+                    VALUES (:rid, :md, :h, :a, :hs, :as, :g)
                     """
                 ),
-                team_rows,
+                match_rows,
             )
-
-            # --- 4. Bracket ---
-            b = payload.bracket
-            # Serialize match_details Pydantic models to plain dicts for JSONB
-            # storage. None if the payload didn't include them (old snapshots).
-            if b.match_details is None:
-                md_json = None
-            else:
-                md_json = _json(
-                    {
-                        round_name: [m.model_dump() for m in matches]
-                        for round_name, matches in b.match_details.items()
-                    }
-                )
-            await db.execute(
-                text(
-                    """
-                    INSERT INTO worldcup.brackets
-                        (run_id, group_winners, best_thirds, r32, r16, qf, sf,
-                         final_pair, champion, match_details)
-                    VALUES (:rid, CAST(:gw AS jsonb), CAST(:bt AS jsonb),
-                            CAST(:r32 AS jsonb), CAST(:r16 AS jsonb),
-                            CAST(:qf AS jsonb), CAST(:sf AS jsonb),
-                            CAST(:fp AS jsonb), :champ,
-                            CAST(:md AS jsonb))
-                    """
-                ),
-                {
-                    "rid": run_id,
-                    "gw": _json(b.group_winners),
-                    "bt": _json(b.best_thirds),
-                    "r32": _json(b.r32),
-                    "r16": _json(b.r16),
-                    "qf": _json(b.qf),
-                    "sf": _json(b.sf),
-                    "fp": _json(b.final_pair),
-                    "champ": b.champion,
-                    "md": md_json,
-                },
-            )
-
-            # --- 5. Played matches (optional) ---
-            if payload.played_matches:
-                match_rows = [
-                    {
-                        "rid": run_id,
-                        "md": m.match_date,
-                        "h": m.home_team, "a": m.away_team,
-                        "hs": m.home_score, "as": m.away_score,
-                        "g": m.group_name,
-                    }
-                    for m in payload.played_matches
-                ]
-                await db.execute(
-                    text(
-                        """
-                        INSERT INTO worldcup.played_matches
-                            (run_id, match_date, home_team, away_team,
-                             home_score, away_score, group_name)
-                        VALUES (:rid, :md, :h, :a, :hs, :as, :g)
-                        """
-                    ),
-                    match_rows,
-                )
-
-    except RuntimeError as exc:
-        # Raised by get_writer_db() when WORLDCUP_DB_WRITER_URL is unset.
-        logger.error("ingest_snapshot disabled: %s", exc)
-        raise HTTPException(
-            status_code=503,
-            detail="Ingest is not configured on this server.",
-        )
 
     return IngestResponse(
         run_id=run_id,
@@ -277,5 +269,4 @@ async def ingest_snapshot(
 
 def _json(value) -> str:
     """Serialize a JSON-compatible Python value for a parameterized INSERT."""
-    import json as _stdlib_json
-    return _stdlib_json.dumps(value, default=str)
+    return json.dumps(value, default=str)

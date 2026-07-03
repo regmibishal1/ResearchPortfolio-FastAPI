@@ -8,6 +8,7 @@ take down the whole app.
 
 from collections.abc import AsyncGenerator
 
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from src.config import settings
@@ -42,9 +43,15 @@ def session_factory():
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """FastAPI dependency yielding an async session bound to the worldcup
-    reader role.
+    reader role. Returns 503 when the database is not configured.
     """
-    factory = session_factory()
+    try:
+        factory = session_factory()
+    except RuntimeError:
+        raise HTTPException(
+            status_code=503,
+            detail="Database is not configured on this server.",
+        )
     async with factory() as session:
         yield session
 
@@ -68,8 +75,15 @@ def _writer_engine():
 async def get_writer_db() -> AsyncGenerator[AsyncSession, None]:
     """FastAPI dependency yielding an async session bound to the worldcup
     writer role. Intended for admin-gated endpoints only; never wire this
-    into a route reachable via has_api_key.
+    into a route reachable via has_api_key. Returns 503 when the writer
+    connection is not configured.
     """
-    _writer_engine()
+    try:
+        _writer_engine()
+    except RuntimeError:
+        raise HTTPException(
+            status_code=503,
+            detail="Ingest is not configured on this server.",
+        )
     async with _cached_writer_session_factory() as session:
         yield session
