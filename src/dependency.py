@@ -1,4 +1,4 @@
-"""Authentication dependencies — see README for the three-tier model."""
+"""Authentication dependencies, see README for the three-tier model."""
 from jose import jwt
 from jose.exceptions import JOSEError
 from fastapi import HTTPException, Depends, Security, status
@@ -13,7 +13,7 @@ JWT_SECRET_ENV = "RP_FASTAPI_JWT_SECRET"
 # Admin token for internal admin operations (never exposed to the UI)
 ADMIN_TOKEN_ENV = "RP_ADMIN_TOKEN"
 
-# API key for public endpoints (stats, demos) — shared with the Angular UI.
+# API key for public endpoints (stats, demos), shared with the Angular UI.
 # Not truly secret (embedded in the JS bundle), but prevents trivial bot abuse.
 # For real protection rely on CORS + Cloudflare rate limiting.
 API_KEY_ENV = "RP_FASTAPI_API_KEY"
@@ -71,7 +71,7 @@ async def has_api_key(api_key: str = Security(_api_key_header)) -> None:
 async def has_admin_access(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """
     Validates a static admin bearer token using constant-time comparison
-    to prevent timing attacks. For internal/admin-only endpoints only —
+    to prevent timing attacks. For internal/admin-only endpoints only,
     this token is never issued to the UI.
     """
     admin_token = os.getenv(ADMIN_TOKEN_ENV)

@@ -3,7 +3,7 @@ HTTP request/response logging middleware.
 
 Responsibilities:
   - Assign a short unique request ID to each request
-  - Extract the real client IP (CF-Connecting-IP → X-Forwarded-For → socket)
+  - Extract the real client IP, trying CF-Connecting-IP, then X-Forwarded-For, then the socket
   - Store both in ContextVars so all downstream loggers see them automatically
   - Log the incoming request and the outgoing response with elapsed time
   - Return X-Request-ID in the response header for end-to-end tracing
@@ -30,11 +30,11 @@ def _get_client_ip(request: Request) -> str:
     Resolve the real originating IP for a request.
 
     Priority:
-      1. CF-Connecting-IP  — set by Cloudflare Tunnel; cannot be spoofed
+      1. CF-Connecting-IP, set by Cloudflare Tunnel; cannot be spoofed
          because the Tunnel terminates TLS before passing the request to us.
-      2. X-Forwarded-For   — leftmost entry, used as fallback for local dev
+      2. X-Forwarded-For, leftmost entry, used as fallback for local dev
          traffic that doesn't go through Cloudflare.
-      3. Socket remote host — last-resort fallback (local direct connections).
+      3. Socket remote host, last-resort fallback (local direct connections).
     """
     cf_ip = request.headers.get("CF-Connecting-IP")
     if cf_ip:
@@ -54,8 +54,8 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
     Each request gets:
       - A 12-character hex request ID (e.g. "a3f9c1d20b44")
       - The real client IP extracted via _get_client_ip()
-      - An incoming log line:  → METHOD /path
-      - An outgoing log line:  ← STATUS METHOD /path  elapsed_ms
+      - An incoming log line:  > METHOD /path
+      - An outgoing log line:  < STATUS METHOD /path  elapsed_ms
       - X-Request-ID response header for correlation in browser / downstream logs
 
     Log levels for outgoing lines:
@@ -69,7 +69,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         req_id = uuid.uuid4().hex[:12]
         client_ip = _get_client_ip(request)
 
-        # Populate ContextVars — visible to all loggers in this async task
+        # Populate ContextVars, visible to all loggers in this async task
         request_id_var.set(req_id)
         client_ip_var.set(client_ip)
 
@@ -77,7 +77,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         is_health = path == "/health"
         in_level = _HEALTH_LOG_LEVEL if is_health else logging.INFO
 
-        logger.log(in_level, "→ %s %s", request.method, path)
+        logger.log(in_level, "> %s %s", request.method, path)
 
         start = time.perf_counter()
         try:
@@ -103,7 +103,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
         logger.log(
             out_level,
-            "← %d %s %s %.1fms",
+            "< %d %s %s %.1fms",
             response.status_code,
             request.method,
             path,
