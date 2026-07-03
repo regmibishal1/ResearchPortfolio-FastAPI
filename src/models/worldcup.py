@@ -1,7 +1,7 @@
 """ORM models for the `worldcup` schema.
 
 Each prediction run produces one row in `worldcup.runs` plus N rows in the
-satellite tables. The schema is intentionally narrow — every percentage is
+satellite tables. The schema is intentionally narrow, every percentage is
 stored as NUMERIC(7,4) so probabilities round-trip exactly, and structural
 data (bracket pairings) lives in JSONB to avoid a brittle pairing-by-pairing
 schema.

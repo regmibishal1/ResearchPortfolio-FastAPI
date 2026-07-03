@@ -10,7 +10,7 @@ import sys
 from contextvars import ContextVar
 
 # ---------------------------------------------------------------------------
-# Per-request context — populated by RequestLoggingMiddleware on each request.
+# Per-request context, populated by RequestLoggingMiddleware on each request.
 # ContextVar is async-safe: each asyncio Task gets its own copy.
 # ---------------------------------------------------------------------------
 request_id_var: ContextVar[str] = ContextVar("request_id", default="-")
@@ -57,7 +57,7 @@ def setup_logging(level: int = logging.INFO) -> None:
     root.addHandler(handler)
     root.setLevel(level)
 
-    # Suppress uvicorn's built-in access log — we produce our own via
+    # Suppress uvicorn's built-in access log, we produce our own via
     # RequestLoggingMiddleware so double-logging would be confusing.
     logging.getLogger("uvicorn.access").handlers.clear()
     logging.getLogger("uvicorn.access").propagate = False

@@ -12,7 +12,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    # Database — runtime read connection.
+    # Database, runtime read connection.
     # Use the worldcup_reader role in production. Format:
     #   postgresql+asyncpg://user:password@host:port/dbname
     # Left as an empty string by default so endpoints that don't need the DB
@@ -28,12 +28,12 @@ class Settings(BaseSettings):
     # via the standalone db_writer.py script in the WC repo.
     worldcup_db_writer_url: str = Field(default="", alias="WORLDCUP_DB_WRITER_URL")
 
-    # CORS allowlist — comma-separated origins permitted to call the API.
+    # CORS allowlist, comma-separated origins permitted to call the API.
     cors_allowed_origins: str = Field(
         default="http://localhost:4200", alias="CORS_ALLOWED_ORIGINS"
     )
 
-    # Debug toggle — any non-empty value flips logging to DEBUG.
+    # Debug toggle, any non-empty value flips logging to DEBUG.
     debug: str = Field(default="", alias="DEBUG")
 
     @property

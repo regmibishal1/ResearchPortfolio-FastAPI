@@ -1,4 +1,4 @@
-"""Model package — re-exports `Base` and every ORM class so Alembic's
+"""Model package, re-exports `Base` and every ORM class so Alembic's
 autogenerate sees the full metadata graph from one import.
 """
 

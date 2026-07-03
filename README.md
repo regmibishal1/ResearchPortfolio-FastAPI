@@ -16,9 +16,9 @@ FastAPI service powering the interactive demos on my research portfolio. Model a
 
 ### Authentication tiers
 
-- **API key** (`X-API-Key` header) — lightweight gate on public demo endpoints to deter bot abuse; rate limiting and CORS provide the real protection.
-- **Admin bearer token** — internal pipeline operations only, never exposed to the browser.
-- **JWT bearer** (HS256, issued by the AuthAPI) — available for user-scoped endpoints via `src/dependency.py`.
+- **API key** (`X-API-Key` header): lightweight gate on public demo endpoints to deter bot abuse; rate limiting and CORS provide the real protection.
+- **Admin bearer token**: internal pipeline operations only, never exposed to the browser.
+- **JWT bearer** (HS256, issued by the AuthAPI): available for user-scoped endpoints via `src/dependency.py`.
 
 ## Stack
 

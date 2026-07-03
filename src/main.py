@@ -23,14 +23,14 @@ app.add_middleware(
 )
 
 # RequestLoggingMiddleware is added last so Starlette's LIFO ordering makes it
-# run outermost — it sees every request before CORS and every response after.
+# run outermost, it sees every request before CORS and every response after.
 app.add_middleware(RequestLoggingMiddleware)
 
 app.include_router(
     health.router
 )
 
-# Semi-public endpoints — API key required (shared with Angular UI).
+# Semi-public endpoints, API key required (shared with Angular UI).
 # Not user-auth (no login needed), but prevents anonymous bot abuse of
 # CPU-intensive sampling endpoints.
 app.include_router(
@@ -40,7 +40,7 @@ app.include_router(
     dependencies=[Depends(has_api_key)],
 )
 
-# World Cup 2026 — read-only endpoints backed by the worldcup Postgres
+# World Cup 2026, read-only endpoints backed by the worldcup Postgres
 # schema. Same API-key gate as /stats; database connection authenticates
 # as worldcup_reader (SELECT-only role).
 app.include_router(
@@ -50,7 +50,7 @@ app.include_router(
     dependencies=[Depends(has_api_key)],
 )
 
-# World Cup 2026 admin — write endpoint used by the prediction pipeline
+# World Cup 2026 admin, write endpoint used by the prediction pipeline
 # runners (workstation or NAS container). Gated by the admin bearer
 # token and authenticates as worldcup_writer for DB writes. Mounted as a
 # separate router so the read endpoints can never accidentally get the

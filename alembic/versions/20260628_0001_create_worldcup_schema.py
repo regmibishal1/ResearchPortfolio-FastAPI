@@ -9,7 +9,7 @@ This migration:
   * grants schema + table privileges to those roles
 
 Role creation requires a privileged DB user. The runtime FastAPI never
-connects with that privileged role — it connects with worldcup_reader.
+connects with that privileged role, it connects with worldcup_reader.
 
 Revision ID: 20260628_0001
 Revises:
@@ -184,5 +184,5 @@ def downgrade() -> None:
     op.execute(f"DROP TABLE IF EXISTS {SCHEMA}.team_probabilities CASCADE")
     op.execute(f"DROP TABLE IF EXISTS {SCHEMA}.runs CASCADE")
     op.execute(f"DROP SCHEMA IF EXISTS {SCHEMA} CASCADE")
-    # Roles intentionally NOT dropped — they may be referenced by other grants
+    # Roles intentionally NOT dropped, they may be referenced by other grants
     # or owned by other objects. Drop manually if you really mean to.
