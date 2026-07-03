@@ -84,8 +84,8 @@ def _generate(distribution: str, params: dict[str, float], n: int) -> np.ndarray
 @router.post("/sample", response_model=SampleResponse)
 async def sample_distribution(request: SampleRequest):
     """
-    Sample from a statistical distribution and return histogram bins + summary stats.
-    Public endpoint — no authentication required.
+    Sample from a statistical distribution and return histogram bins + summary
+    stats. Gated by the shared API key (see src/main.py router mount).
     """
     logger.info(
         "sample_distribution distribution=%s n=%d bins=%d params=%s",

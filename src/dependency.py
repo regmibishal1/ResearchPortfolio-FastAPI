@@ -1,4 +1,4 @@
-# adding script to manage authentication and other dependencies
+"""Authentication dependencies — see README for the three-tier model."""
 from jose import jwt
 from jose.exceptions import JOSEError
 from fastapi import HTTPException, Depends, Security, status
