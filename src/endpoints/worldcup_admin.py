@@ -46,6 +46,21 @@ class IngestTeamProb(BaseModel):
     elo: float
 
 
+class TopFactor(BaseModel):
+    """One SHAP-derived contributor to the model's matchup prediction.
+
+    `impact` is the raw SHAP value on the predicted class from the base
+    XGBoost model (calibrated probabilities preserve the ordering). `favors`
+    names the team the feature pushed the prediction toward, or None on the
+    rare draw prediction.
+    """
+    feature: str
+    label: str
+    value: float
+    impact: float
+    favors: str | None = None
+
+
 class MatchDetail(BaseModel):
     """Per-match scoreline record. Predicted score always present (from the
     Poisson xG solver); actual_score + winner + went_to_penalties only
@@ -57,6 +72,7 @@ class MatchDetail(BaseModel):
     actual_score: list[int] | None = None
     went_to_penalties: bool = False
     winner: str | None = None
+    top_factors: list[TopFactor] | None = None
 
 
 class IngestBracket(BaseModel):

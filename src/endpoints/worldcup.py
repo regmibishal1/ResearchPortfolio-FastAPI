@@ -62,6 +62,14 @@ class LatestResponse(BaseModel):
     leaderboard: list[TeamRow]
 
 
+class TopFactor(BaseModel):
+    feature: str
+    label: str
+    value: float
+    impact: float
+    favors: str | None = None
+
+
 class MatchDetail(BaseModel):
     teams: list[str]
     predicted_score: list[int]
@@ -69,6 +77,7 @@ class MatchDetail(BaseModel):
     actual_score: list[int] | None = None
     went_to_penalties: bool = False
     winner: str | None = None
+    top_factors: list[TopFactor] | None = None
 
 
 class BracketResponse(BaseModel):
