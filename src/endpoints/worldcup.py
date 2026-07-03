@@ -146,15 +146,17 @@ StageLiteral = Literal["winner", "final", "sf", "qf", "r16", "r32"]
 async def _latest_run(
     db: AsyncSession,
     tournament_key: str,
+    as_of_date: date | None = None,
 ) -> WorldCupRun:
-    """Return the most recent run for a tournament, ordered by as_of_date
-    then run_timestamp_utc so multiple same-day labels resolve to the
-    chronologically last write.
+    """Return the most recent run for a tournament, optionally pinned to a
+    specific snapshot date. Ordered by as_of_date then run_timestamp_utc so
+    multiple same-day labels resolve to the chronologically last write.
     """
+    query = select(WorldCupRun).where(WorldCupRun.tournament_key == tournament_key)
+    if as_of_date is not None:
+        query = query.where(WorldCupRun.as_of_date == as_of_date)
     result = await db.execute(
-        select(WorldCupRun)
-        .where(WorldCupRun.tournament_key == tournament_key)
-        .order_by(
+        query.order_by(
             WorldCupRun.as_of_date.desc(),
             WorldCupRun.run_timestamp_utc.desc(),
         )
@@ -162,10 +164,10 @@ async def _latest_run(
     )
     run = result.scalar_one_or_none()
     if run is None:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No runs found for tournament {tournament_key!r}",
-        )
+        detail = f"No runs found for tournament {tournament_key!r}"
+        if as_of_date is not None:
+            detail = f"{detail} on {as_of_date.isoformat()}"
+        raise HTTPException(status_code=404, detail=detail)
     return run
 
 
@@ -188,10 +190,13 @@ def _run_to_meta(run: WorldCupRun) -> RunMeta:
 async def get_latest(
     tournament: str = Query(default="2026", description="Tournament key"),
     limit: int = Query(default=48, ge=1, le=200, description="Top-N teams to return"),
+    as_of_date: date | None = Query(
+        default=None, description="Pin to a specific snapshot date instead of the latest"
+    ),
     db: AsyncSession = Depends(get_db),
 ):
-    """Most recent snapshot summary plus the full leaderboard."""
-    run = await _latest_run(db, tournament)
+    """Snapshot summary plus the full leaderboard (latest by default)."""
+    run = await _latest_run(db, tournament, as_of_date)
 
     result = await db.execute(
         select(WorldCupTeamProbability)
@@ -220,10 +225,13 @@ async def get_latest(
 @router.get("/bracket", response_model=BracketResponse)
 async def get_bracket(
     tournament: str = Query(default="2026"),
+    as_of_date: date | None = Query(
+        default=None, description="Pin to a specific snapshot date instead of the latest"
+    ),
     db: AsyncSession = Depends(get_db),
 ):
-    """Deterministic most-probable bracket for the most recent run."""
-    run = await _latest_run(db, tournament)
+    """Deterministic most-probable bracket (latest run by default)."""
+    run = await _latest_run(db, tournament, as_of_date)
 
     result = await db.execute(
         select(WorldCupBracket).where(WorldCupBracket.run_id == run.id)
