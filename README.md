@@ -58,6 +58,15 @@ uvicorn src.main:app --reload --port 8000
 
 Interactive API docs are available at `http://localhost:8000/docs` while the server is running.
 
+### Tests
+
+```bash
+pip install -r requirements-dev.txt
+pytest tests/ -v
+```
+
+Smoke tests cover app startup, `/health`, request-ID propagation, and the API key gate on `/stats`. They run without a database and execute in CI on every pull request.
+
 ## Docker
 
 ```bash
