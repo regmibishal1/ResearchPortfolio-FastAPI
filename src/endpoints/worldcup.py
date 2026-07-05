@@ -97,6 +97,22 @@ class BracketResponse(BaseModel):
     match_details: dict[str, list[MatchDetail]] | None = None
 
 
+class ReportCardResponse(BaseModel):
+    run_id: int
+    as_of_date: date
+    # Walk-forward evaluation blob produced by the pipeline; None for runs
+    # pushed before report cards existed.
+    report_card: dict | None
+
+
+class ScenariosResponse(BaseModel):
+    run_id: int
+    as_of_date: date
+    # What-if conditional odds blob; None for runs pushed before scenarios
+    # existed.
+    scenarios: dict | None
+
+
 class HistoryPoint(BaseModel):
     as_of_date: date
     label: str | None
@@ -256,6 +272,40 @@ async def get_bracket(
         final_pair=bracket.final_pair,
         champion=bracket.champion,
         match_details=bracket.match_details,
+    )
+
+
+@router.get("/report-card", response_model=ReportCardResponse)
+async def get_report_card(
+    tournament: str = Query(default="2026"),
+    as_of_date: date | None = Query(
+        default=None, description="Pin to a specific snapshot date instead of the latest"
+    ),
+    db: AsyncSession = Depends(get_db),
+):
+    """Walk-forward model evaluation for the selected run."""
+    run = await _latest_run(db, tournament, as_of_date)
+    return ReportCardResponse(
+        run_id=run.id,
+        as_of_date=run.as_of_date,
+        report_card=(run.metadata_ or {}).get("report_card"),
+    )
+
+
+@router.get("/scenarios", response_model=ScenariosResponse)
+async def get_scenarios(
+    tournament: str = Query(default="2026"),
+    as_of_date: date | None = Query(
+        default=None, description="Pin to a specific snapshot date instead of the latest"
+    ),
+    db: AsyncSession = Depends(get_db),
+):
+    """What-if conditional championship odds for upcoming matches."""
+    run = await _latest_run(db, tournament, as_of_date)
+    return ScenariosResponse(
+        run_id=run.id,
+        as_of_date=run.as_of_date,
+        scenarios=(run.metadata_ or {}).get("scenarios"),
     )
 
 
