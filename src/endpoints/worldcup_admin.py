@@ -34,6 +34,9 @@ class IngestRunMeta(BaseModel):
     n_simulations: int = Field(gt=0)
     n_played_matches_locked: int = Field(ge=0)
     run_timestamp_utc: datetime
+    # Free-form analytics blobs (report_card, scenarios). Stored in the
+    # runs.metadata JSONB column; optional for backwards compatibility.
+    metadata: dict = {}
 
 
 class IngestTeamProb(BaseModel):
@@ -144,11 +147,13 @@ async def ingest_snapshot(
                 INSERT INTO worldcup.runs
                     (tournament_key, as_of_date, label, n_simulations,
                      n_played_matches_locked, run_timestamp_utc, metadata)
-                VALUES (:tk, :date, :label, :nsim, :nplay, :ts, '{}'::jsonb)
+                VALUES (:tk, :date, :label, :nsim, :nplay, :ts,
+                        CAST(:meta AS jsonb))
                 ON CONFLICT (tournament_key, as_of_date, label) DO UPDATE
                     SET n_simulations           = EXCLUDED.n_simulations,
                         n_played_matches_locked = EXCLUDED.n_played_matches_locked,
-                        run_timestamp_utc       = EXCLUDED.run_timestamp_utc
+                        run_timestamp_utc       = EXCLUDED.run_timestamp_utc,
+                        metadata                = EXCLUDED.metadata
                 RETURNING id
                 """
             ),
@@ -159,6 +164,7 @@ async def ingest_snapshot(
                 "nsim": payload.meta.n_simulations,
                 "nplay": payload.meta.n_played_matches_locked,
                 "ts": payload.meta.run_timestamp_utc,
+                "meta": _json(payload.meta.metadata),
             },
         )
         run_id: int = result.scalar_one()
