@@ -68,3 +68,31 @@ def test_request_id_header_present():
     response = client.get("/health")
     assert "X-Request-ID" in response.headers
     assert len(response.headers["X-Request-ID"]) == 12
+
+
+def test_stocks_latest_requires_api_key():
+    response = client.get("/stocks/latest")
+    assert response.status_code == 403
+
+
+def test_stocks_latest_rejects_wrong_api_key():
+    response = client.get("/stocks/latest", headers={"X-API-Key": "not-the-key"})
+    assert response.status_code == 403
+
+
+def test_stocks_latest_without_db_returns_503():
+    # Valid API key passes the gate; with no stocks reader configured in CI
+    # the endpoint degrades to 503 rather than erroring.
+    response = client.get("/stocks/latest", headers={"X-API-Key": API_KEY})
+    assert response.status_code == 503
+
+
+def test_stocks_ingest_requires_admin_token():
+    # The admin bearer gate runs before anything else; an API key is not
+    # sufficient to reach the writer path.
+    response = client.post(
+        "/stocks/ingest",
+        json={},
+        headers={"X-API-Key": API_KEY},
+    )
+    assert response.status_code == 403
