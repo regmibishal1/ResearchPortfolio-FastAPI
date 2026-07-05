@@ -3,6 +3,12 @@ autogenerate sees the full metadata graph from one import.
 """
 
 from src.models.base import Base
+from src.models.stocks import (
+    StocksCompany,
+    StocksRun,
+    StocksSector,
+    StocksTrackRecord,
+)
 from src.models.worldcup import (
     WorldCupBracket,
     WorldCupPlayedMatch,
@@ -12,6 +18,10 @@ from src.models.worldcup import (
 
 __all__ = [
     "Base",
+    "StocksCompany",
+    "StocksRun",
+    "StocksSector",
+    "StocksTrackRecord",
     "WorldCupBracket",
     "WorldCupPlayedMatch",
     "WorldCupRun",

@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import settings
-from src.endpoints import health, stats, worldcup, worldcup_admin
+from src.endpoints import health, stats, stocks, stocks_admin, worldcup, worldcup_admin
 from src.dependency import has_admin_access, has_api_key
 from src.logging_config import setup_logging
 from src.middleware import RequestLoggingMiddleware
@@ -59,5 +59,26 @@ app.include_router(
     worldcup_admin.router,
     prefix="/worldcup",
     tags=["worldcup-admin"],
+    dependencies=[Depends(has_admin_access)],
+)
+
+# EDGAR fundamentals signals, read-only endpoints backed by the stocks
+# Postgres schema. Same API-key gate as /stats; database connection
+# authenticates as stocks_reader (SELECT-only role).
+app.include_router(
+    stocks.router,
+    prefix="/stocks",
+    tags=["stocks"],
+    dependencies=[Depends(has_api_key)],
+)
+
+# Stocks admin, write endpoint used by the edgar-signals pipeline. Gated by
+# the admin bearer token and authenticates as stocks_writer for DB writes.
+# Separate router so the read endpoints never get writer credentials wired
+# into their request scope.
+app.include_router(
+    stocks_admin.router,
+    prefix="/stocks",
+    tags=["stocks-admin"],
     dependencies=[Depends(has_admin_access)],
 )

@@ -13,6 +13,12 @@ FastAPI service powering the interactive demos on my research portfolio. Model a
 | GET | `/worldcup/history` | API key | Per-team probability series across runs |
 | GET | `/worldcup/played-matches` | API key | Locked group-stage results for the latest run |
 | POST | `/worldcup/ingest` | admin bearer | Snapshot ingestion from the prediction pipeline |
+| GET | `/stocks/latest` | API key | Latest fundamentals snapshot, metrics, and sector heatmap |
+| GET | `/stocks/companies` | API key | Per-company signals for the latest snapshot |
+| GET | `/stocks/company/{ticker}` | API key | One company's signal plus its history across snapshots |
+| GET | `/stocks/track-record` | API key | Realized walk-forward track record for the latest snapshot |
+| GET | `/stocks/history` | API key | A single run-level metric across snapshots |
+| POST | `/stocks/ingest` | admin bearer | Snapshot ingestion from the edgar-signals pipeline |
 
 ### Authentication tiers
 
@@ -34,7 +40,9 @@ All configuration comes from environment variables. No secrets are committed to 
 | Variable | Purpose |
 |---|---|
 | `DATABASE_URL` | Read-side Postgres connection (SELECT-only role) |
-| `WORLDCUP_DB_WRITER_URL` | Write-side connection used only by the ingest endpoint |
+| `WORLDCUP_DB_WRITER_URL` | Write-side connection used only by the worldcup ingest endpoint |
+| `STOCKS_DB_READER_URL` | Read-side connection for the stocks schema (SELECT-only role); falls back to `DATABASE_URL` when unset |
+| `STOCKS_DB_WRITER_URL` | Write-side connection used only by the stocks ingest endpoint |
 | `RP_FASTAPI_JWT_SECRET` | Shared secret for verifying JWTs issued by the AuthAPI |
 | `RP_ADMIN_TOKEN` | Bearer token for admin-only operations |
 | `RP_FASTAPI_API_KEY` | API key required by demo endpoints |

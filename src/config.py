@@ -28,6 +28,18 @@ class Settings(BaseSettings):
     # via the standalone db_writer.py script in the WC repo.
     worldcup_db_writer_url: str = Field(default="", alias="WORLDCUP_DB_WRITER_URL")
 
+    # Read connection for the stocks schema, uses the stocks_reader role in
+    # production. Separate from DATABASE_URL so each schema keeps its own
+    # least-privilege login. Falls back to DATABASE_URL (see stocks_reader_url)
+    # for single-connection local dev.
+    stocks_db_reader_url: str = Field(default="", alias="STOCKS_DB_READER_URL")
+
+    # Optional writer connection used only by the admin-gated /stocks/ingest
+    # endpoint. Carries the stocks_writer role on a distinct engine so the
+    # read-side engine stays SELECT-only at the DB layer. When unset, ingest
+    # returns 503.
+    stocks_db_writer_url: str = Field(default="", alias="STOCKS_DB_WRITER_URL")
+
     # CORS allowlist, comma-separated origins permitted to call the API.
     cors_allowed_origins: str = Field(
         default="http://localhost:4200", alias="CORS_ALLOWED_ORIGINS"
@@ -39,6 +51,13 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_allowed_origins.split(",") if o.strip()]
+
+    @property
+    def stocks_reader_url(self) -> str:
+        """Reader connection for the stocks schema, falling back to the shared
+        DATABASE_URL when a dedicated stocks reader is not configured.
+        """
+        return self.stocks_db_reader_url or self.database_url
 
 
 settings = Settings()
