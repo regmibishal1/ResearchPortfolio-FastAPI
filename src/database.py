@@ -20,6 +20,10 @@ _cached_engine = None
 _cached_session_factory = None
 _cached_writer_engine = None
 _cached_writer_session_factory = None
+_cached_stocks_reader_engine = None
+_cached_stocks_reader_session_factory = None
+_cached_stocks_writer_engine = None
+_cached_stocks_writer_session_factory = None
 
 
 def _engine():
@@ -86,4 +90,68 @@ async def get_writer_db() -> AsyncGenerator[AsyncSession, None]:
             detail="Ingest is not configured on this server.",
         )
     async with _cached_writer_session_factory() as session:
+        yield session
+
+
+def _stocks_reader_engine():
+    global _cached_stocks_reader_engine, _cached_stocks_reader_session_factory
+    if _cached_stocks_reader_engine is None:
+        if not settings.stocks_reader_url:
+            raise RuntimeError(
+                "No stocks reader connection is set; stocks endpoints are disabled."
+            )
+        _cached_stocks_reader_engine = create_async_engine(
+            settings.stocks_reader_url, echo=False
+        )
+        _cached_stocks_reader_session_factory = async_sessionmaker(
+            _cached_stocks_reader_engine, class_=AsyncSession, expire_on_commit=False
+        )
+    return _cached_stocks_reader_engine
+
+
+async def get_stocks_db() -> AsyncGenerator[AsyncSession, None]:
+    """FastAPI dependency yielding an async session bound to the stocks
+    reader role. Returns 503 when no stocks reader connection is configured.
+    """
+    try:
+        _stocks_reader_engine()
+    except RuntimeError:
+        raise HTTPException(
+            status_code=503,
+            detail="Database is not configured on this server.",
+        )
+    async with _cached_stocks_reader_session_factory() as session:
+        yield session
+
+
+def _stocks_writer_engine():
+    global _cached_stocks_writer_engine, _cached_stocks_writer_session_factory
+    if _cached_stocks_writer_engine is None:
+        if not settings.stocks_db_writer_url:
+            raise RuntimeError(
+                "STOCKS_DB_WRITER_URL is not set; stocks ingest is disabled."
+            )
+        _cached_stocks_writer_engine = create_async_engine(
+            settings.stocks_db_writer_url, echo=False
+        )
+        _cached_stocks_writer_session_factory = async_sessionmaker(
+            _cached_stocks_writer_engine, class_=AsyncSession, expire_on_commit=False
+        )
+    return _cached_stocks_writer_engine
+
+
+async def get_stocks_writer_db() -> AsyncGenerator[AsyncSession, None]:
+    """FastAPI dependency yielding an async session bound to the stocks
+    writer role. Intended for admin-gated endpoints only; never wire this
+    into a route reachable via has_api_key. Returns 503 when the writer
+    connection is not configured.
+    """
+    try:
+        _stocks_writer_engine()
+    except RuntimeError:
+        raise HTTPException(
+            status_code=503,
+            detail="Ingest is not configured on this server.",
+        )
+    async with _cached_stocks_writer_session_factory() as session:
         yield session
