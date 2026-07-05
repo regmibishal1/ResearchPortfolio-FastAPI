@@ -7,15 +7,15 @@ Rebuild the constraint with NULLS NOT DISTINCT (Postgres 15+) after
 collapsing any duplicates that already accumulated, keeping the most
 recent run of each group.
 
-Revision ID: 20260705_0003
-Revises: 20260630_0002
+Revision ID: 20260705_0004
+Revises: 20260705_0003
 Create Date: 2026-07-05
 """
 
 from alembic import op
 
-revision = "20260705_0003"
-down_revision = "20260630_0002"
+revision = "20260705_0004"
+down_revision = "20260705_0003"
 branch_labels = None
 depends_on = None
 
