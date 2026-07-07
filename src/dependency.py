@@ -1,11 +1,22 @@
 """Authentication dependencies, see README for the three-tier model."""
 from jose import jwt
 from jose.exceptions import JOSEError
-from fastapi import HTTPException, Depends, Security, status
+from fastapi import HTTPException, Depends, Security, status, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, APIKeyHeader
 import os
 import base64
 import hmac
+
+# Cache policy for the public read-only World Cup data. The snapshot changes
+# at most a few times a day, so a short browser cache plus a longer
+# serve-stale window keeps repeat visits fast without risking staleness. It
+# also lets a Cloudflare cache rule serve these responses from the edge.
+WORLDCUP_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=3600"
+
+
+async def set_worldcup_cache(response: Response) -> None:
+    """Attach the read-only cache policy to every World Cup GET response."""
+    response.headers["Cache-Control"] = WORLDCUP_CACHE_CONTROL
 
 # JWT secret for verifying tokens signed by AuthAPI
 JWT_SECRET_ENV = "RP_FASTAPI_JWT_SECRET"
