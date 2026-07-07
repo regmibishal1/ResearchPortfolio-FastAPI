@@ -4,7 +4,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import settings
 from src.endpoints import health, stats, stocks, stocks_admin, worldcup, worldcup_admin
-from src.dependency import has_admin_access, has_api_key
+from src.dependency import has_admin_access, has_api_key, set_worldcup_cache
 from src.logging_config import setup_logging
 from src.middleware import RequestLoggingMiddleware
 
@@ -47,7 +47,7 @@ app.include_router(
     worldcup.router,
     prefix="/worldcup",
     tags=["worldcup"],
-    dependencies=[Depends(has_api_key)],
+    dependencies=[Depends(has_api_key), Depends(set_worldcup_cache)],
 )
 
 # World Cup 2026 admin, write endpoint used by the prediction pipeline
