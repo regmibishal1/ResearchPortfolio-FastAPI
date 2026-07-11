@@ -4,6 +4,10 @@ Only initialised when DATABASE_URL is set, so endpoints that don't need the
 database (health, stats sampler) still work in dev environments without
 Postgres running. The engine is created lazily so import-time failures don't
 take down the whole app.
+
+Every engine sets pool_pre_ping so pooled connections are revalidated before
+use; a Postgres restart otherwise leaves dead connections in the pool and the
+next request on each one fails with "connection is closed".
 """
 
 from collections.abc import AsyncGenerator
@@ -33,7 +37,9 @@ def _engine():
             raise RuntimeError(
                 "DATABASE_URL is not set; database-backed endpoints are disabled."
             )
-        _cached_engine = create_async_engine(settings.database_url, echo=False)
+        _cached_engine = create_async_engine(
+            settings.database_url, echo=False, pool_pre_ping=True
+        )
         _cached_session_factory = async_sessionmaker(
             _cached_engine, class_=AsyncSession, expire_on_commit=False
         )
@@ -68,7 +74,7 @@ def _writer_engine():
                 "WORLDCUP_DB_WRITER_URL is not set; ingest is disabled."
             )
         _cached_writer_engine = create_async_engine(
-            settings.worldcup_db_writer_url, echo=False
+            settings.worldcup_db_writer_url, echo=False, pool_pre_ping=True
         )
         _cached_writer_session_factory = async_sessionmaker(
             _cached_writer_engine, class_=AsyncSession, expire_on_commit=False
@@ -101,7 +107,7 @@ def _stocks_reader_engine():
                 "No stocks reader connection is set; stocks endpoints are disabled."
             )
         _cached_stocks_reader_engine = create_async_engine(
-            settings.stocks_reader_url, echo=False
+            settings.stocks_reader_url, echo=False, pool_pre_ping=True
         )
         _cached_stocks_reader_session_factory = async_sessionmaker(
             _cached_stocks_reader_engine, class_=AsyncSession, expire_on_commit=False
@@ -132,7 +138,7 @@ def _stocks_writer_engine():
                 "STOCKS_DB_WRITER_URL is not set; stocks ingest is disabled."
             )
         _cached_stocks_writer_engine = create_async_engine(
-            settings.stocks_db_writer_url, echo=False
+            settings.stocks_db_writer_url, echo=False, pool_pre_ping=True
         )
         _cached_stocks_writer_session_factory = async_sessionmaker(
             _cached_stocks_writer_engine, class_=AsyncSession, expire_on_commit=False
