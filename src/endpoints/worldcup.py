@@ -113,6 +113,14 @@ class ScenariosResponse(BaseModel):
     scenarios: dict | None
 
 
+class RetrospectiveResponse(BaseModel):
+    run_id: int
+    as_of_date: date
+    # Post-tournament wrap-up blob; None for runs pushed before it existed
+    # and {"complete": false} until the final has a result.
+    retrospective: dict | None
+
+
 class HistoryPoint(BaseModel):
     as_of_date: date
     label: str | None
@@ -306,6 +314,23 @@ async def get_scenarios(
         run_id=run.id,
         as_of_date=run.as_of_date,
         scenarios=(run.metadata_ or {}).get("scenarios"),
+    )
+
+
+@router.get("/retrospective", response_model=RetrospectiveResponse)
+async def get_retrospective(
+    tournament: str = Query(default="2026"),
+    as_of_date: date | None = Query(
+        default=None, description="Pin to a specific snapshot date instead of the latest"
+    ),
+    db: AsyncSession = Depends(get_db),
+):
+    """Post-tournament wrap-up analysis for the selected run."""
+    run = await _latest_run(db, tournament, as_of_date)
+    return RetrospectiveResponse(
+        run_id=run.id,
+        as_of_date=run.as_of_date,
+        retrospective=(run.metadata_ or {}).get("retrospective"),
     )
 
 
