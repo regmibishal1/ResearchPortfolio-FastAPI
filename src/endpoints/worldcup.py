@@ -73,6 +73,7 @@ class TopFactor(BaseModel):
 class MatchDetail(BaseModel):
     teams: list[str]
     predicted_score: list[int]
+    predicted_winner: str | None = None
     played: bool = False
     actual_score: list[int] | None = None
     went_to_penalties: bool = False

@@ -72,6 +72,9 @@ class MatchDetail(BaseModel):
     """
     teams: list[str] = Field(min_length=2, max_length=2)
     predicted_score: list[int] = Field(min_length=2, max_length=2)
+    # The model's pick for the matchup, present even when the predicted
+    # scoreline is a draw. Optional for snapshots pushed before it existed.
+    predicted_winner: str | None = None
     played: bool = False
     actual_score: list[int] | None = None
     went_to_penalties: bool = False
