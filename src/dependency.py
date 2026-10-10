@@ -1,22 +1,28 @@
 """Authentication dependencies, see README for the three-tier model."""
-from jose import jwt
-from jose.exceptions import JOSEError
+import jwt
 from fastapi import HTTPException, Depends, Security, status, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, APIKeyHeader
 import os
 import base64
 import hmac
 
-# Cache policy for the public read-only World Cup data. The snapshot changes
-# at most a few times a day, so a short browser cache plus a longer
-# serve-stale window keeps repeat visits fast without risking staleness. It
-# also lets a Cloudflare cache rule serve these responses from the edge.
-WORLDCUP_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=3600"
+# Cache policy for the public read-only data (World Cup and stocks). Each
+# snapshot changes at most a few times a day, so a short browser cache plus a
+# longer serve-stale window keeps repeat visits fast without risking
+# staleness. It also lets a Cloudflare cache rule serve these responses from
+# the edge.
+READ_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=3600"
+WORLDCUP_CACHE_CONTROL = READ_CACHE_CONTROL
 
 
 async def set_worldcup_cache(response: Response) -> None:
     """Attach the read-only cache policy to every World Cup GET response."""
-    response.headers["Cache-Control"] = WORLDCUP_CACHE_CONTROL
+    response.headers["Cache-Control"] = READ_CACHE_CONTROL
+
+
+async def set_read_cache(response: Response) -> None:
+    """Attach the read-only cache policy to a public GET response."""
+    response.headers["Cache-Control"] = READ_CACHE_CONTROL
 
 # JWT secret for verifying tokens signed by AuthAPI
 JWT_SECRET_ENV = "RP_FASTAPI_JWT_SECRET"
@@ -35,7 +41,9 @@ _api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
 async def has_access(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """
-    Validates a JWT bearer token signed by the AuthAPI (HS256).
+    Validates a JWT bearer token signed by the AuthAPI (HS256). Only access
+    tokens are accepted; the AuthAPI marks them with typ="access", so a
+    refresh token cannot stand in for one.
     """
     token = credentials.credentials
 
@@ -52,12 +60,18 @@ async def has_access(credentials: HTTPAuthorizationCredentials = Depends(securit
 
         payload = jwt.decode(token,
                              key=api_secret_bytes,  # need to use bytes
-                             algorithms=["HS256"])
-    except JOSEError as e:  # catches any JOSE exception
+                             algorithms=["HS256"],
+                             options={"require": ["exp", "sub"]})
+    except jwt.PyJWTError:
+        # A fixed message: the library's text says why a token failed,
+        # which is nothing a client needs.
+        payload = None
+    if payload is None or payload.get("typ") != "access":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e)
+            detail="Invalid or expired token",
         )
+    return payload
 
 
 async def has_api_key(api_key: str = Security(_api_key_header)) -> None:
