@@ -2,6 +2,8 @@
 
 FastAPI service powering the interactive demos on my research portfolio. Model and calculation endpoints run live server-side rather than as static screenshots.
 
+To report a security problem privately, see [SECURITY.md](SECURITY.md).
+
 ## Endpoints
 
 | Method | Path | Auth | Purpose |
