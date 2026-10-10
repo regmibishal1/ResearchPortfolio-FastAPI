@@ -79,6 +79,14 @@ pip-compile --generate-hashes --allow-unsafe --strip-extras requirements-dev.in
 
 CI runs `pip-audit` against both files, and Dependabot proposes monthly updates.
 
+### API schema
+
+`openapi.json` is the committed OpenAPI schema. The UI generates its TypeScript types from it and checks its interfaces against them, so the two cannot drift silently. After changing a request or response model, regenerate it (a test fails until you do) and copy it to the UI's `src/app/api/fastapi-openapi.json`:
+
+```bash
+python scripts/export_openapi.py
+```
+
 ### Tests
 
 ```bash

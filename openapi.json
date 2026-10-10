@@ -1,0 +1,3064 @@
+{
+  "components": {
+    "schemas": {
+      "BracketResponse": {
+        "properties": {
+          "as_of_date": {
+            "format": "date",
+            "title": "As Of Date",
+            "type": "string"
+          },
+          "best_thirds": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Best Thirds",
+            "type": "array"
+          },
+          "champion": {
+            "title": "Champion",
+            "type": "string"
+          },
+          "final_pair": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Final Pair",
+            "type": "array"
+          },
+          "group_winners": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Group Winners",
+            "type": "object"
+          },
+          "match_details": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "items": {
+                    "$ref": "#/components/schemas/MatchDetail-Output"
+                  },
+                  "type": "array"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Details"
+          },
+          "qf": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Qf",
+            "type": "array"
+          },
+          "r16": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "R16",
+            "type": "array"
+          },
+          "r32": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "R32",
+            "type": "array"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "integer"
+          },
+          "sf": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Sf",
+            "type": "array"
+          },
+          "tournament_key": {
+            "title": "Tournament Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "as_of_date",
+          "tournament_key",
+          "group_winners",
+          "best_thirds",
+          "r32",
+          "r16",
+          "qf",
+          "sf",
+          "final_pair",
+          "champion"
+        ],
+        "title": "BracketResponse",
+        "type": "object"
+      },
+      "CompaniesResponse": {
+        "properties": {
+          "companies": {
+            "items": {
+              "$ref": "#/components/schemas/CompanyRow"
+            },
+            "title": "Companies",
+            "type": "array"
+          },
+          "run": {
+            "$ref": "#/components/schemas/src__endpoints__stocks__RunMeta"
+          }
+        },
+        "required": [
+          "run",
+          "companies"
+        ],
+        "title": "CompaniesResponse",
+        "type": "object"
+      },
+      "CompanyDetailResponse": {
+        "properties": {
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/CompanyHistoryPoint"
+            },
+            "title": "History",
+            "type": "array"
+          },
+          "latest": {
+            "$ref": "#/components/schemas/CompanyRow"
+          },
+          "run": {
+            "$ref": "#/components/schemas/src__endpoints__stocks__RunMeta"
+          }
+        },
+        "required": [
+          "run",
+          "latest",
+          "history"
+        ],
+        "title": "CompanyDetailResponse",
+        "type": "object"
+      },
+      "CompanyHistoryPoint": {
+        "properties": {
+          "as_of_date": {
+            "format": "date",
+            "title": "As Of Date",
+            "type": "string"
+          },
+          "exret_63": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exret 63"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "predicted_vol": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predicted Vol"
+          },
+          "sue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sue"
+          }
+        },
+        "required": [
+          "as_of_date",
+          "label",
+          "sue",
+          "predicted_vol",
+          "exret_63"
+        ],
+        "title": "CompanyHistoryPoint",
+        "type": "object"
+      },
+      "CompanyRow": {
+        "properties": {
+          "company_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "exret_63": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exret 63"
+          },
+          "filed": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filed"
+          },
+          "lag_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lag Days"
+          },
+          "ni_sue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ni Sue"
+          },
+          "pre_vol": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pre Vol"
+          },
+          "predicted_vol": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predicted Vol"
+          },
+          "rev_sue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rev Sue"
+          },
+          "sector": {
+            "title": "Sector",
+            "type": "string"
+          },
+          "sue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sue"
+          },
+          "sue_quintile": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sue Quintile"
+          },
+          "ticker": {
+            "title": "Ticker",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ticker",
+          "sector",
+          "company_name",
+          "filed",
+          "sue",
+          "rev_sue",
+          "ni_sue",
+          "lag_days",
+          "pre_vol",
+          "predicted_vol",
+          "exret_63",
+          "sue_quintile"
+        ],
+        "title": "CompanyRow",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HistogramBin": {
+        "properties": {
+          "bin_end": {
+            "title": "Bin End",
+            "type": "number"
+          },
+          "bin_start": {
+            "title": "Bin Start",
+            "type": "number"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "frequency": {
+            "title": "Frequency",
+            "type": "number"
+          }
+        },
+        "required": [
+          "bin_start",
+          "bin_end",
+          "count",
+          "frequency"
+        ],
+        "title": "HistogramBin",
+        "type": "object"
+      },
+      "HistoryPoint": {
+        "properties": {
+          "as_of_date": {
+            "format": "date",
+            "title": "As Of Date",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "n_played_matches_locked": {
+            "title": "N Played Matches Locked",
+            "type": "integer"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "as_of_date",
+          "label",
+          "n_played_matches_locked",
+          "value"
+        ],
+        "title": "HistoryPoint",
+        "type": "object"
+      },
+      "IngestBracket": {
+        "properties": {
+          "best_thirds": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Best Thirds",
+            "type": "array"
+          },
+          "champion": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Champion",
+            "type": "string"
+          },
+          "final_pair": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Final Pair",
+            "type": "array"
+          },
+          "group_winners": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Group Winners",
+            "type": "object"
+          },
+          "match_details": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "items": {
+                    "$ref": "#/components/schemas/MatchDetail-Input"
+                  },
+                  "type": "array"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Details"
+          },
+          "qf": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Qf",
+            "type": "array"
+          },
+          "r16": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "R16",
+            "type": "array"
+          },
+          "r32": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "R32",
+            "type": "array"
+          },
+          "sf": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Sf",
+            "type": "array"
+          }
+        },
+        "required": [
+          "group_winners",
+          "best_thirds",
+          "r32",
+          "r16",
+          "qf",
+          "sf",
+          "final_pair",
+          "champion"
+        ],
+        "title": "IngestBracket",
+        "type": "object"
+      },
+      "IngestCompany": {
+        "properties": {
+          "company_name": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "exret_63": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exret 63"
+          },
+          "filed": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filed"
+          },
+          "lag_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lag Days"
+          },
+          "ni_sue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ni Sue"
+          },
+          "pre_vol": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pre Vol"
+          },
+          "predicted_vol": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predicted Vol"
+          },
+          "rev_sue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rev Sue"
+          },
+          "sector": {
+            "maxLength": 16,
+            "minLength": 1,
+            "title": "Sector",
+            "type": "string"
+          },
+          "sue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sue"
+          },
+          "sue_quintile": {
+            "anyOf": [
+              {
+                "maximum": 5.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sue Quintile"
+          },
+          "ticker": {
+            "maxLength": 16,
+            "minLength": 1,
+            "title": "Ticker",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ticker",
+          "sector"
+        ],
+        "title": "IngestCompany",
+        "type": "object"
+      },
+      "IngestPlayedMatch": {
+        "properties": {
+          "away_score": {
+            "minimum": 0.0,
+            "title": "Away Score",
+            "type": "integer"
+          },
+          "away_team": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Away Team",
+            "type": "string"
+          },
+          "group_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Name"
+          },
+          "home_score": {
+            "minimum": 0.0,
+            "title": "Home Score",
+            "type": "integer"
+          },
+          "home_team": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Home Team",
+            "type": "string"
+          },
+          "match_date": {
+            "format": "date",
+            "title": "Match Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "match_date",
+          "home_team",
+          "away_team",
+          "home_score",
+          "away_score"
+        ],
+        "title": "IngestPlayedMatch",
+        "type": "object"
+      },
+      "IngestResponse": {
+        "properties": {
+          "rows_written": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Rows Written",
+            "type": "object"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_id",
+          "rows_written"
+        ],
+        "title": "IngestResponse",
+        "type": "object"
+      },
+      "IngestSector": {
+        "properties": {
+          "mean_exret_63": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Exret 63"
+          },
+          "mean_predicted_vol": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Predicted Vol"
+          },
+          "mean_sue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Sue"
+          },
+          "n_names": {
+            "minimum": 0.0,
+            "title": "N Names",
+            "type": "integer"
+          },
+          "sector": {
+            "maxLength": 16,
+            "minLength": 1,
+            "title": "Sector",
+            "type": "string"
+          },
+          "sector_name": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Sector Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sector",
+          "sector_name",
+          "n_names"
+        ],
+        "title": "IngestSector",
+        "type": "object"
+      },
+      "IngestTeamProb": {
+        "properties": {
+          "elo": {
+            "title": "Elo",
+            "type": "number"
+          },
+          "final_pct": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Final Pct",
+            "type": "number"
+          },
+          "qf_pct": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Qf Pct",
+            "type": "number"
+          },
+          "r16_pct": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "R16 Pct",
+            "type": "number"
+          },
+          "r32_pct": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "R32 Pct",
+            "type": "number"
+          },
+          "sf_pct": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Sf Pct",
+            "type": "number"
+          },
+          "team": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Team",
+            "type": "string"
+          },
+          "winner_pct": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Winner Pct",
+            "type": "number"
+          }
+        },
+        "required": [
+          "team",
+          "winner_pct",
+          "final_pct",
+          "sf_pct",
+          "qf_pct",
+          "r16_pct",
+          "r32_pct",
+          "elo"
+        ],
+        "title": "IngestTeamProb",
+        "type": "object"
+      },
+      "IngestTrackRecord": {
+        "properties": {
+          "ic": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ic"
+          },
+          "long_short_ret": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Long Short Ret"
+          },
+          "n": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N"
+          },
+          "period_label": {
+            "maxLength": 16,
+            "minLength": 1,
+            "title": "Period Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "period_label"
+        ],
+        "title": "IngestTrackRecord",
+        "type": "object"
+      },
+      "MatchDetail-Input": {
+        "description": "Per-match scoreline record. Predicted score always present (from the\nPoisson xG solver); actual_score + winner + went_to_penalties only\npopulated for knockout matches that have been played.",
+        "properties": {
+          "actual_score": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Score"
+          },
+          "played": {
+            "default": false,
+            "title": "Played",
+            "type": "boolean"
+          },
+          "predicted_score": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Predicted Score",
+            "type": "array"
+          },
+          "predicted_winner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predicted Winner"
+          },
+          "teams": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Teams",
+            "type": "array"
+          },
+          "top_factors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TopFactor-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Factors"
+          },
+          "went_to_penalties": {
+            "default": false,
+            "title": "Went To Penalties",
+            "type": "boolean"
+          },
+          "winner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Winner"
+          }
+        },
+        "required": [
+          "teams",
+          "predicted_score"
+        ],
+        "title": "MatchDetail",
+        "type": "object"
+      },
+      "MatchDetail-Output": {
+        "properties": {
+          "actual_score": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Score"
+          },
+          "played": {
+            "default": false,
+            "title": "Played",
+            "type": "boolean"
+          },
+          "predicted_score": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Predicted Score",
+            "type": "array"
+          },
+          "predicted_winner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predicted Winner"
+          },
+          "teams": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Teams",
+            "type": "array"
+          },
+          "top_factors": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/TopFactor-Output"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Factors"
+          },
+          "went_to_penalties": {
+            "default": false,
+            "title": "Went To Penalties",
+            "type": "boolean"
+          },
+          "winner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Winner"
+          }
+        },
+        "required": [
+          "teams",
+          "predicted_score"
+        ],
+        "title": "MatchDetail",
+        "type": "object"
+      },
+      "MetricPoint": {
+        "properties": {
+          "as_of_date": {
+            "format": "date",
+            "title": "As Of Date",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "as_of_date",
+          "label",
+          "value"
+        ],
+        "title": "MetricPoint",
+        "type": "object"
+      },
+      "PlayedMatch": {
+        "properties": {
+          "away_score": {
+            "title": "Away Score",
+            "type": "integer"
+          },
+          "away_team": {
+            "title": "Away Team",
+            "type": "string"
+          },
+          "group_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Name"
+          },
+          "home_score": {
+            "title": "Home Score",
+            "type": "integer"
+          },
+          "home_team": {
+            "title": "Home Team",
+            "type": "string"
+          },
+          "match_date": {
+            "format": "date",
+            "title": "Match Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "match_date",
+          "home_team",
+          "away_team",
+          "home_score",
+          "away_score",
+          "group_name"
+        ],
+        "title": "PlayedMatch",
+        "type": "object"
+      },
+      "PlayedMatchesResponse": {
+        "properties": {
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/PlayedMatch"
+            },
+            "title": "Matches",
+            "type": "array"
+          },
+          "run": {
+            "$ref": "#/components/schemas/src__endpoints__worldcup__RunMeta"
+          }
+        },
+        "required": [
+          "run",
+          "matches"
+        ],
+        "title": "PlayedMatchesResponse",
+        "type": "object"
+      },
+      "ReportCardResponse": {
+        "properties": {
+          "as_of_date": {
+            "format": "date",
+            "title": "As Of Date",
+            "type": "string"
+          },
+          "report_card": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Report Card"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_id",
+          "as_of_date",
+          "report_card"
+        ],
+        "title": "ReportCardResponse",
+        "type": "object"
+      },
+      "RetrospectiveResponse": {
+        "properties": {
+          "as_of_date": {
+            "format": "date",
+            "title": "As Of Date",
+            "type": "string"
+          },
+          "retrospective": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrospective"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_id",
+          "as_of_date",
+          "retrospective"
+        ],
+        "title": "RetrospectiveResponse",
+        "type": "object"
+      },
+      "SampleRequest": {
+        "properties": {
+          "distribution": {
+            "enum": [
+              "normal",
+              "uniform",
+              "exponential",
+              "beta",
+              "binomial",
+              "poisson"
+            ],
+            "title": "Distribution",
+            "type": "string"
+          },
+          "n_bins": {
+            "default": 40,
+            "maximum": 100.0,
+            "minimum": 5.0,
+            "title": "N Bins",
+            "type": "integer"
+          },
+          "n_samples": {
+            "default": 1000,
+            "maximum": 10000.0,
+            "minimum": 100.0,
+            "title": "N Samples",
+            "type": "integer"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Params",
+            "type": "object"
+          }
+        },
+        "required": [
+          "distribution",
+          "params"
+        ],
+        "title": "SampleRequest",
+        "type": "object"
+      },
+      "SampleResponse": {
+        "properties": {
+          "distribution": {
+            "title": "Distribution",
+            "type": "string"
+          },
+          "histogram": {
+            "items": {
+              "$ref": "#/components/schemas/HistogramBin"
+            },
+            "title": "Histogram",
+            "type": "array"
+          },
+          "n_samples": {
+            "title": "N Samples",
+            "type": "integer"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Params",
+            "type": "object"
+          },
+          "stats": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Stats",
+            "type": "object"
+          }
+        },
+        "required": [
+          "histogram",
+          "stats",
+          "distribution",
+          "params",
+          "n_samples"
+        ],
+        "title": "SampleResponse",
+        "type": "object"
+      },
+      "ScenariosResponse": {
+        "properties": {
+          "as_of_date": {
+            "format": "date",
+            "title": "As Of Date",
+            "type": "string"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "integer"
+          },
+          "scenarios": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenarios"
+          }
+        },
+        "required": [
+          "run_id",
+          "as_of_date",
+          "scenarios"
+        ],
+        "title": "ScenariosResponse",
+        "type": "object"
+      },
+      "SectorRow": {
+        "properties": {
+          "mean_exret_63": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Exret 63"
+          },
+          "mean_predicted_vol": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Predicted Vol"
+          },
+          "mean_sue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Sue"
+          },
+          "n_names": {
+            "title": "N Names",
+            "type": "integer"
+          },
+          "sector": {
+            "title": "Sector",
+            "type": "string"
+          },
+          "sector_name": {
+            "title": "Sector Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sector",
+          "sector_name",
+          "n_names",
+          "mean_sue",
+          "mean_predicted_vol",
+          "mean_exret_63"
+        ],
+        "title": "SectorRow",
+        "type": "object"
+      },
+      "TeamRow": {
+        "properties": {
+          "elo": {
+            "title": "Elo",
+            "type": "number"
+          },
+          "final_pct": {
+            "title": "Final Pct",
+            "type": "number"
+          },
+          "qf_pct": {
+            "title": "Qf Pct",
+            "type": "number"
+          },
+          "r16_pct": {
+            "title": "R16 Pct",
+            "type": "number"
+          },
+          "r32_pct": {
+            "title": "R32 Pct",
+            "type": "number"
+          },
+          "sf_pct": {
+            "title": "Sf Pct",
+            "type": "number"
+          },
+          "team": {
+            "title": "Team",
+            "type": "string"
+          },
+          "winner_pct": {
+            "title": "Winner Pct",
+            "type": "number"
+          }
+        },
+        "required": [
+          "team",
+          "winner_pct",
+          "final_pct",
+          "sf_pct",
+          "qf_pct",
+          "r16_pct",
+          "r32_pct",
+          "elo"
+        ],
+        "title": "TeamRow",
+        "type": "object"
+      },
+      "TeamSeries": {
+        "properties": {
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryPoint"
+            },
+            "title": "Points",
+            "type": "array"
+          },
+          "team": {
+            "title": "Team",
+            "type": "string"
+          }
+        },
+        "required": [
+          "team",
+          "points"
+        ],
+        "title": "TeamSeries",
+        "type": "object"
+      },
+      "TopFactor-Input": {
+        "description": "One SHAP-derived contributor to the model's matchup prediction.\n\n`impact` is the raw SHAP value on the predicted class from the base\nXGBoost model (calibrated probabilities preserve the ordering). `favors`\nnames the team the feature pushed the prediction toward, or None on the\nrare draw prediction.",
+        "properties": {
+          "favors": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Favors"
+          },
+          "feature": {
+            "title": "Feature",
+            "type": "string"
+          },
+          "impact": {
+            "title": "Impact",
+            "type": "number"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "feature",
+          "label",
+          "value",
+          "impact"
+        ],
+        "title": "TopFactor",
+        "type": "object"
+      },
+      "TopFactor-Output": {
+        "properties": {
+          "favors": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Favors"
+          },
+          "feature": {
+            "title": "Feature",
+            "type": "string"
+          },
+          "impact": {
+            "title": "Impact",
+            "type": "number"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "feature",
+          "label",
+          "value",
+          "impact"
+        ],
+        "title": "TopFactor",
+        "type": "object"
+      },
+      "TrackRecordPoint": {
+        "properties": {
+          "ic": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ic"
+          },
+          "long_short_ret": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Long Short Ret"
+          },
+          "n": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N"
+          },
+          "period_label": {
+            "title": "Period Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "period_label",
+          "ic",
+          "long_short_ret",
+          "n"
+        ],
+        "title": "TrackRecordPoint",
+        "type": "object"
+      },
+      "TrackRecordResponse": {
+        "properties": {
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/TrackRecordPoint"
+            },
+            "title": "Points",
+            "type": "array"
+          },
+          "run": {
+            "$ref": "#/components/schemas/src__endpoints__stocks__RunMeta"
+          }
+        },
+        "required": [
+          "run",
+          "points"
+        ],
+        "title": "TrackRecordResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "src__endpoints__stocks__HistoryResponse": {
+        "properties": {
+          "metric": {
+            "title": "Metric",
+            "type": "string"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/MetricPoint"
+            },
+            "title": "Points",
+            "type": "array"
+          }
+        },
+        "required": [
+          "metric",
+          "points"
+        ],
+        "title": "HistoryResponse",
+        "type": "object"
+      },
+      "src__endpoints__stocks__LatestResponse": {
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/src__endpoints__stocks__RunMeta"
+          },
+          "sectors": {
+            "items": {
+              "$ref": "#/components/schemas/SectorRow"
+            },
+            "title": "Sectors",
+            "type": "array"
+          }
+        },
+        "required": [
+          "run",
+          "sectors"
+        ],
+        "title": "LatestResponse",
+        "type": "object"
+      },
+      "src__endpoints__stocks__RunMeta": {
+        "properties": {
+          "as_of_date": {
+            "format": "date",
+            "title": "As Of Date",
+            "type": "string"
+          },
+          "end_date": {
+            "format": "date",
+            "title": "End Date",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "metrics": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Metrics",
+            "type": "object"
+          },
+          "n_events": {
+            "title": "N Events",
+            "type": "integer"
+          },
+          "run_timestamp_utc": {
+            "format": "date-time",
+            "title": "Run Timestamp Utc",
+            "type": "string"
+          },
+          "start_date": {
+            "format": "date",
+            "title": "Start Date",
+            "type": "string"
+          },
+          "universe_size": {
+            "title": "Universe Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "as_of_date",
+          "label",
+          "universe_size",
+          "n_events",
+          "start_date",
+          "end_date",
+          "run_timestamp_utc",
+          "metrics"
+        ],
+        "title": "RunMeta",
+        "type": "object"
+      },
+      "src__endpoints__stocks_admin__IngestPayload": {
+        "properties": {
+          "companies": {
+            "items": {
+              "$ref": "#/components/schemas/IngestCompany"
+            },
+            "minItems": 1,
+            "title": "Companies",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/src__endpoints__stocks_admin__IngestRunMeta"
+          },
+          "sectors": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/IngestSector"
+            },
+            "title": "Sectors",
+            "type": "array"
+          },
+          "track_record": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/IngestTrackRecord"
+            },
+            "title": "Track Record",
+            "type": "array"
+          }
+        },
+        "required": [
+          "meta",
+          "companies"
+        ],
+        "title": "IngestPayload",
+        "type": "object"
+      },
+      "src__endpoints__stocks_admin__IngestRunMeta": {
+        "properties": {
+          "as_of_date": {
+            "format": "date",
+            "title": "As Of Date",
+            "type": "string"
+          },
+          "end_date": {
+            "format": "date",
+            "title": "End Date",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Metadata",
+            "type": "object"
+          },
+          "metrics": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Metrics",
+            "type": "object"
+          },
+          "n_events": {
+            "minimum": 0.0,
+            "title": "N Events",
+            "type": "integer"
+          },
+          "run_timestamp_utc": {
+            "format": "date-time",
+            "title": "Run Timestamp Utc",
+            "type": "string"
+          },
+          "start_date": {
+            "format": "date",
+            "title": "Start Date",
+            "type": "string"
+          },
+          "universe_size": {
+            "exclusiveMinimum": 0.0,
+            "title": "Universe Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "as_of_date",
+          "universe_size",
+          "n_events",
+          "start_date",
+          "end_date",
+          "run_timestamp_utc"
+        ],
+        "title": "IngestRunMeta",
+        "type": "object"
+      },
+      "src__endpoints__worldcup__HistoryResponse": {
+        "properties": {
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/TeamSeries"
+            },
+            "title": "Series",
+            "type": "array"
+          },
+          "stage": {
+            "title": "Stage",
+            "type": "string"
+          },
+          "tournament_key": {
+            "title": "Tournament Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tournament_key",
+          "stage",
+          "series"
+        ],
+        "title": "HistoryResponse",
+        "type": "object"
+      },
+      "src__endpoints__worldcup__LatestResponse": {
+        "properties": {
+          "leaderboard": {
+            "items": {
+              "$ref": "#/components/schemas/TeamRow"
+            },
+            "title": "Leaderboard",
+            "type": "array"
+          },
+          "run": {
+            "$ref": "#/components/schemas/src__endpoints__worldcup__RunMeta"
+          }
+        },
+        "required": [
+          "run",
+          "leaderboard"
+        ],
+        "title": "LatestResponse",
+        "type": "object"
+      },
+      "src__endpoints__worldcup__RunMeta": {
+        "properties": {
+          "as_of_date": {
+            "format": "date",
+            "title": "As Of Date",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "n_played_matches_locked": {
+            "title": "N Played Matches Locked",
+            "type": "integer"
+          },
+          "n_simulations": {
+            "title": "N Simulations",
+            "type": "integer"
+          },
+          "run_timestamp_utc": {
+            "format": "date-time",
+            "title": "Run Timestamp Utc",
+            "type": "string"
+          },
+          "tournament_key": {
+            "title": "Tournament Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tournament_key",
+          "as_of_date",
+          "label",
+          "n_simulations",
+          "n_played_matches_locked",
+          "run_timestamp_utc"
+        ],
+        "title": "RunMeta",
+        "type": "object"
+      },
+      "src__endpoints__worldcup_admin__IngestPayload": {
+        "properties": {
+          "bracket": {
+            "$ref": "#/components/schemas/IngestBracket"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/src__endpoints__worldcup_admin__IngestRunMeta"
+          },
+          "played_matches": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/IngestPlayedMatch"
+            },
+            "title": "Played Matches",
+            "type": "array"
+          },
+          "team_probabilities": {
+            "items": {
+              "$ref": "#/components/schemas/IngestTeamProb"
+            },
+            "minItems": 1,
+            "title": "Team Probabilities",
+            "type": "array"
+          }
+        },
+        "required": [
+          "meta",
+          "team_probabilities",
+          "bracket"
+        ],
+        "title": "IngestPayload",
+        "type": "object"
+      },
+      "src__endpoints__worldcup_admin__IngestRunMeta": {
+        "properties": {
+          "as_of_date": {
+            "format": "date",
+            "title": "As Of Date",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Metadata",
+            "type": "object"
+          },
+          "n_played_matches_locked": {
+            "minimum": 0.0,
+            "title": "N Played Matches Locked",
+            "type": "integer"
+          },
+          "n_simulations": {
+            "exclusiveMinimum": 0.0,
+            "title": "N Simulations",
+            "type": "integer"
+          },
+          "run_timestamp_utc": {
+            "format": "date-time",
+            "title": "Run Timestamp Utc",
+            "type": "string"
+          },
+          "tournament_key": {
+            "default": "2026",
+            "title": "Tournament Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "as_of_date",
+          "n_simulations",
+          "n_played_matches_locked",
+          "run_timestamp_utc"
+        ],
+        "title": "IngestRunMeta",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "in": "header",
+        "name": "X-API-Key",
+        "type": "apiKey"
+      },
+      "HTTPBearer": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "FastAPI",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "api_health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Api Health"
+      }
+    },
+    "/stats/sample": {
+      "post": {
+        "description": "Sample from a statistical distribution and return histogram bins + summary\nstats. Gated by the shared API key (see src/main.py router mount).",
+        "operationId": "sample_distribution_stats_sample_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SampleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Sample Distribution",
+        "tags": [
+          "stats"
+        ]
+      }
+    },
+    "/stocks/companies": {
+      "get": {
+        "description": "Per-company signals for the latest snapshot (optionally one sector).",
+        "operationId": "get_companies_stocks_companies_get",
+        "parameters": [
+          {
+            "description": "Filter to one sector ETF code",
+            "in": "query",
+            "name": "sector",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter to one sector ETF code",
+              "title": "Sector"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "as_of_date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Of Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompaniesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Get Companies",
+        "tags": [
+          "stocks"
+        ]
+      }
+    },
+    "/stocks/company/{ticker}": {
+      "get": {
+        "description": "One company's latest signal plus its history across every snapshot.",
+        "operationId": "get_company_stocks_company__ticker__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ticker",
+            "required": true,
+            "schema": {
+              "title": "Ticker",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Get Company",
+        "tags": [
+          "stocks"
+        ]
+      }
+    },
+    "/stocks/history": {
+      "get": {
+        "description": "A single run-level metric across every snapshot, for a trend chart.",
+        "operationId": "get_history_stocks_history_get",
+        "parameters": [
+          {
+            "description": "Run-level metric key",
+            "in": "query",
+            "name": "metric",
+            "required": false,
+            "schema": {
+              "default": "ic_t",
+              "description": "Run-level metric key",
+              "title": "Metric",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/src__endpoints__stocks__HistoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Get History",
+        "tags": [
+          "stocks"
+        ]
+      }
+    },
+    "/stocks/ingest": {
+      "post": {
+        "description": "Push an analysis snapshot into the stocks schema.\n\nIdempotent: re-posting the same (as_of_date, label) upserts the run row\nand replaces every satellite row inside one transaction.",
+        "operationId": "ingest_snapshot_stocks_ingest_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/src__endpoints__stocks_admin__IngestPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ingest Snapshot",
+        "tags": [
+          "stocks-admin"
+        ]
+      }
+    },
+    "/stocks/latest": {
+      "get": {
+        "description": "Latest snapshot metadata, headline metrics, and the sector heatmap.",
+        "operationId": "get_latest_stocks_latest_get",
+        "parameters": [
+          {
+            "description": "Pin to a specific snapshot date instead of the latest",
+            "in": "query",
+            "name": "as_of_date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pin to a specific snapshot date instead of the latest",
+              "title": "As Of Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/src__endpoints__stocks__LatestResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Get Latest",
+        "tags": [
+          "stocks"
+        ]
+      }
+    },
+    "/stocks/track-record": {
+      "get": {
+        "description": "Realized walk-forward track record for the latest snapshot.",
+        "operationId": "get_track_record_stocks_track_record_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "as_of_date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Of Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackRecordResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Get Track Record",
+        "tags": [
+          "stocks"
+        ]
+      }
+    },
+    "/worldcup/bracket": {
+      "get": {
+        "description": "Deterministic most-probable bracket (latest run by default).",
+        "operationId": "get_bracket_worldcup_bracket_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tournament",
+            "required": false,
+            "schema": {
+              "default": "2026",
+              "title": "Tournament",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Pin to a specific snapshot date instead of the latest",
+            "in": "query",
+            "name": "as_of_date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pin to a specific snapshot date instead of the latest",
+              "title": "As Of Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BracketResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Get Bracket",
+        "tags": [
+          "worldcup"
+        ]
+      }
+    },
+    "/worldcup/history": {
+      "get": {
+        "description": "Per-team probability series across every archived snapshot.\n\nUsed by the UI's time-series chart. Snapshots are ordered chronologically;\neach point is `(as_of_date, value)` for the chosen stage.",
+        "operationId": "get_history_worldcup_history_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tournament",
+            "required": false,
+            "schema": {
+              "default": "2026",
+              "title": "Tournament",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Which probability column to return",
+            "in": "query",
+            "name": "stage",
+            "required": false,
+            "schema": {
+              "default": "winner",
+              "description": "Which probability column to return",
+              "enum": [
+                "winner",
+                "final",
+                "sf",
+                "qf",
+                "r16",
+                "r32"
+              ],
+              "title": "Stage",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated team names. If omitted, returns the top 10 teams by latest winner_pct.",
+            "in": "query",
+            "name": "teams",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Comma-separated team names. If omitted, returns the top 10 teams by latest winner_pct.",
+              "title": "Teams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/src__endpoints__worldcup__HistoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Get History",
+        "tags": [
+          "worldcup"
+        ]
+      }
+    },
+    "/worldcup/ingest": {
+      "post": {
+        "description": "Push a prediction snapshot into the worldcup schema.\n\nIdempotent: re-posting the same (tournament_key, as_of_date, label)\nupserts the run row and replaces every satellite row inside one\ntransaction. Used both by the workstation primary path and the NAS\nfallback container.",
+        "operationId": "ingest_snapshot_worldcup_ingest_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/src__endpoints__worldcup_admin__IngestPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Ingest Snapshot",
+        "tags": [
+          "worldcup-admin"
+        ]
+      }
+    },
+    "/worldcup/latest": {
+      "get": {
+        "description": "Snapshot summary plus the full leaderboard (latest by default).",
+        "operationId": "get_latest_worldcup_latest_get",
+        "parameters": [
+          {
+            "description": "Tournament key",
+            "in": "query",
+            "name": "tournament",
+            "required": false,
+            "schema": {
+              "default": "2026",
+              "description": "Tournament key",
+              "title": "Tournament",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Top-N teams to return",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 48,
+              "description": "Top-N teams to return",
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Pin to a specific snapshot date instead of the latest",
+            "in": "query",
+            "name": "as_of_date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pin to a specific snapshot date instead of the latest",
+              "title": "As Of Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/src__endpoints__worldcup__LatestResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Get Latest",
+        "tags": [
+          "worldcup"
+        ]
+      }
+    },
+    "/worldcup/played-matches": {
+      "get": {
+        "description": "Locked group-stage results from the most recent snapshot.",
+        "operationId": "get_played_matches_worldcup_played_matches_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tournament",
+            "required": false,
+            "schema": {
+              "default": "2026",
+              "title": "Tournament",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayedMatchesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Get Played Matches",
+        "tags": [
+          "worldcup"
+        ]
+      }
+    },
+    "/worldcup/report-card": {
+      "get": {
+        "description": "Walk-forward model evaluation for the selected run.",
+        "operationId": "get_report_card_worldcup_report_card_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tournament",
+            "required": false,
+            "schema": {
+              "default": "2026",
+              "title": "Tournament",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Pin to a specific snapshot date instead of the latest",
+            "in": "query",
+            "name": "as_of_date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pin to a specific snapshot date instead of the latest",
+              "title": "As Of Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportCardResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Get Report Card",
+        "tags": [
+          "worldcup"
+        ]
+      }
+    },
+    "/worldcup/retrospective": {
+      "get": {
+        "description": "Post-tournament wrap-up analysis for the selected run.",
+        "operationId": "get_retrospective_worldcup_retrospective_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tournament",
+            "required": false,
+            "schema": {
+              "default": "2026",
+              "title": "Tournament",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Pin to a specific snapshot date instead of the latest",
+            "in": "query",
+            "name": "as_of_date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pin to a specific snapshot date instead of the latest",
+              "title": "As Of Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetrospectiveResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Get Retrospective",
+        "tags": [
+          "worldcup"
+        ]
+      }
+    },
+    "/worldcup/scenarios": {
+      "get": {
+        "description": "What-if conditional championship odds for upcoming matches.",
+        "operationId": "get_scenarios_worldcup_scenarios_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "tournament",
+            "required": false,
+            "schema": {
+              "default": "2026",
+              "title": "Tournament",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Pin to a specific snapshot date instead of the latest",
+            "in": "query",
+            "name": "as_of_date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Pin to a specific snapshot date instead of the latest",
+              "title": "As Of Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenariosResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "summary": "Get Scenarios",
+        "tags": [
+          "worldcup"
+        ]
+      }
+    }
+  }
+}
