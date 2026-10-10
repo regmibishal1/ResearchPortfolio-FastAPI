@@ -1765,7 +1765,9 @@
             "title": "Label"
           },
           "metrics": {
-            "additionalProperties": true,
+            "additionalProperties": {
+              "type": "number"
+            },
             "title": "Metrics",
             "type": "object"
           },
