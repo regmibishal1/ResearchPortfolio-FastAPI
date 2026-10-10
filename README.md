@@ -10,6 +10,9 @@ FastAPI service powering the interactive demos on my research portfolio. Model a
 | POST | `/stats/sample` | API key | Statistical distribution sampler |
 | GET | `/worldcup/latest` | API key | Most recent prediction snapshot and leaderboard |
 | GET | `/worldcup/bracket` | API key | Most-probable bracket for the latest run |
+| GET | `/worldcup/report-card` | API key | Walk-forward model evaluation for a run |
+| GET | `/worldcup/scenarios` | API key | What-if championship odds for upcoming matches |
+| GET | `/worldcup/retrospective` | API key | Post-tournament wrap-up for a run |
 | GET | `/worldcup/history` | API key | Per-team probability series across runs |
 | GET | `/worldcup/played-matches` | API key | Locked group-stage results for the latest run |
 | POST | `/worldcup/ingest` | admin bearer | Snapshot ingestion from the prediction pipeline |
@@ -19,6 +22,10 @@ FastAPI service powering the interactive demos on my research portfolio. Model a
 | GET | `/stocks/track-record` | API key | Realized walk-forward track record for the latest snapshot |
 | GET | `/stocks/history` | API key | A single run-level metric across snapshots |
 | POST | `/stocks/ingest` | admin bearer | Snapshot ingestion from the edgar-signals pipeline |
+
+### World Cup routes are an archive
+
+The 2026 tournament ended on July 19, and the last snapshot was ingested that day. The site no longer calls `/worldcup/*`: it reads a frozen export of these routes, written by `scripts/export-worldcup.mjs` in the UI repo. The routes stay up as the source of that export and as a record of every daily run; nothing ingests new snapshots now.
 
 ### Authentication tiers
 
