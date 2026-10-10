@@ -29,7 +29,7 @@ def test_stats_requires_api_key():
         "/stats/sample",
         json={"distribution": "normal", "params": {}},
     )
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 def test_stats_rejects_wrong_api_key():
@@ -72,7 +72,7 @@ def test_request_id_header_present():
 
 def test_stocks_latest_requires_api_key():
     response = client.get("/stocks/latest")
-    assert response.status_code == 403
+    assert response.status_code == 401
 
 
 def test_stocks_latest_rejects_wrong_api_key():
@@ -95,4 +95,4 @@ def test_stocks_ingest_requires_admin_token():
         json={},
         headers={"X-API-Key": API_KEY},
     )
-    assert response.status_code == 403
+    assert response.status_code == 401

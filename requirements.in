@@ -1,0 +1,13 @@
+# Direct runtime dependencies. requirements.txt is compiled from this file
+# with hashes; after editing, regenerate it with:
+#   pip-compile --generate-hashes --allow-unsafe requirements.in
+fastapi
+uvicorn[standard]
+gunicorn
+# 2.1 changes async session behavior; move deliberately, with DB tests.
+sqlalchemy[asyncio]>=2.0,<2.1
+asyncpg
+alembic
+pydantic-settings
+numpy
+PyJWT

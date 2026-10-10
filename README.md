@@ -28,7 +28,7 @@ FastAPI service powering the interactive demos on my research portfolio. Model a
 
 ## Stack
 
-- Python 3.10, FastAPI, Pydantic v2
+- Python 3.13, FastAPI, Pydantic v2
 - SQLAlchemy 2 (async) + PostgreSQL, migrations via Alembic
 - Gunicorn with Uvicorn workers in production; Uvicorn reload for development
 - Structured request-scoped logging with request-ID tracing and real client IP resolution
@@ -47,7 +47,8 @@ All configuration comes from environment variables. No secrets are committed to 
 | `RP_ADMIN_TOKEN` | Bearer token for admin-only operations |
 | `RP_FASTAPI_API_KEY` | API key required by demo endpoints |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated allowlist of frontend origins |
-| `DEBUG` | Any non-empty value enables debug logging |
+| `DEBUG` | Any non-empty value enables debug logging and the interactive docs |
+| `WEB_CONCURRENCY` | Gunicorn worker count in the container (default 4) |
 
 Endpoints degrade gracefully when optional configuration is absent: database-backed routes return `503` if their connection string is unset, so the service still runs in minimal environments.
 
@@ -64,7 +65,19 @@ export CORS_ALLOWED_ORIGINS=http://localhost:4200
 uvicorn src.main:app --reload --port 8000
 ```
 
-Interactive API docs are available at `http://localhost:8000/docs` while the server is running.
+Interactive API docs (`/docs`, `/redoc`, `/openapi.json`) are served only when `DEBUG` is set, so production does not publish them. Run with `DEBUG=1` locally to use them.
+
+### Dependencies
+
+`requirements.in` lists the direct dependencies; `requirements.txt` is compiled from it with exact versions and hashes, so installs are reproducible and checked. To add or upgrade a package, edit the `.in` file and recompile with [pip-tools](https://pip-tools.readthedocs.io/):
+
+```bash
+pip install pip-tools
+pip-compile --generate-hashes --allow-unsafe --strip-extras requirements.in
+pip-compile --generate-hashes --allow-unsafe --strip-extras requirements-dev.in
+```
+
+CI runs `pip-audit` against both files, and Dependabot proposes monthly updates.
 
 ### Tests
 
@@ -73,7 +86,7 @@ pip install -r requirements-dev.txt
 pytest tests/ -v
 ```
 
-Smoke tests cover app startup, `/health`, request-ID propagation, and the API key gate on `/stats`. They run without a database and execute in CI on every pull request.
+Smoke tests cover app startup, `/health`, request-ID propagation, the API key and admin gates, the production defaults (no public docs, a narrow CORS policy) and the JWT check. They run without a database and execute in CI on every pull request. A missing API key or bearer token gets `401`; a wrong one gets `403`.
 
 ## Docker
 
@@ -85,4 +98,4 @@ docker run --rm -p 8000:8000 \
   researchportfolio-fastapi
 ```
 
-In production the service runs behind a Cloudflare Tunnel alongside the AuthAPI and PostgreSQL, with each component connecting to the database under its own least-privilege role.
+The image runs as an unprivileged user and has a `HEALTHCHECK` on `/health`. In production the service runs behind a Cloudflare Tunnel alongside the AuthAPI and PostgreSQL, with each component connecting to the database under its own least-privilege role.
