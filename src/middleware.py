@@ -12,10 +12,12 @@ import logging
 import time
 import uuid
 
+from starlette.concurrency import run_in_threadpool
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
+from src import request_stats
 from src.logging_config import client_ip_var, request_id_var
 
 logger = logging.getLogger(__name__)
@@ -23,6 +25,22 @@ logger = logging.getLogger(__name__)
 # Health checks are polled frequently; log them at DEBUG to keep production
 # output clean. Flip to logging.INFO if you need to audit liveness traffic.
 _HEALTH_LOG_LEVEL = logging.DEBUG
+
+
+def _route_of(request: Request) -> str:
+    """
+    The route as a template ("/stocks/company/{ticker}"), so counts never key
+    on raw values. Built from the real path: the matched route's own path
+    leaves out the router prefix.
+    """
+    if request.scope.get("route") is None:
+        return "unmatched"
+    names = {str(value): name for name, value in request.path_params.items()}
+    segments = []
+    for segment in request.url.path.split("/"):
+        name = names.pop(segment, None)
+        segments.append("{" + name + "}" if name else segment)
+    return "/".join(segments)
 
 
 def _get_client_ip(request: Request) -> str:
@@ -90,6 +108,10 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 path,
                 elapsed,
             )
+            if not is_health:
+                await run_in_threadpool(
+                    request_stats.record, request.method, _route_of(request), 500, elapsed, req_id
+                )
             raise
 
         elapsed = (time.perf_counter() - start) * 1000
@@ -109,6 +131,17 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             path,
             elapsed,
         )
+
+        # Counted for the admin dashboard; health probes would drown everything else.
+        if not is_health and request.method != "OPTIONS":
+            await run_in_threadpool(
+                request_stats.record,
+                request.method,
+                _route_of(request),
+                response.status_code,
+                elapsed,
+                req_id,
+            )
 
         # Echo the request ID so clients can correlate browser logs with server logs
         response.headers["X-Request-ID"] = req_id
