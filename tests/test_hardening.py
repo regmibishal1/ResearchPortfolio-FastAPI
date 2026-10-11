@@ -20,7 +20,7 @@ from src.dependency import has_access  # noqa: E402
 from src.main import app  # noqa: E402
 
 client = TestClient(app)
-SECRET = base64.b64encode(os.urandom(48)).decode()
+SECRET = base64.b64encode(os.urandom(64)).decode()  # the size production uses
 ORIGIN = "http://localhost:4200"
 
 
@@ -72,6 +72,21 @@ def jwt_secret(monkeypatch):
 
 def test_access_tokens_pass():
     assert _check(_token(typ="access"))["sub"] == "someone"
+
+
+@pytest.mark.parametrize("alg", ["HS384", "HS512"])
+def test_the_authapi_signs_with_the_hmac_size_its_key_allows(alg):
+    body = {"sub": "someone", "typ": "access", "exp": int(time.time()) + 60}
+    token = jwt.encode(body, base64.b64decode(SECRET), algorithm=alg)
+    assert _check(token)["sub"] == "someone"
+
+
+def test_unsigned_tokens_are_refused():
+    body = {"sub": "someone", "typ": "access", "exp": int(time.time()) + 60}
+    token = jwt.encode(body, None, algorithm="none")
+    with pytest.raises(HTTPException) as caught:
+        _check(token)
+    assert caught.value.status_code == 401
 
 
 @pytest.mark.parametrize(

@@ -41,7 +41,7 @@ _api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
 async def has_access(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """
-    Validates a JWT bearer token signed by the AuthAPI (HS256). Only access
+    Validates a JWT bearer token signed by the AuthAPI (HMAC). Only access
     tokens are accepted; the AuthAPI marks them with typ="access", so a
     refresh token cannot stand in for one.
     """
@@ -58,9 +58,12 @@ async def has_access(credentials: HTTPAuthorizationCredentials = Depends(securit
         # Decode the base64-encoded secret key into bytes
         api_secret_bytes = base64.b64decode(api_secret)
 
+        # The AuthAPI's JWT library picks the HMAC size from the key length
+        # (a 64-byte secret signs HS512), so accept the HMAC family. All
+        # three use the shared secret; nothing else is accepted.
         payload = jwt.decode(token,
                              key=api_secret_bytes,  # need to use bytes
-                             algorithms=["HS256"],
+                             algorithms=["HS256", "HS384", "HS512"],
                              options={"require": ["exp", "sub"]})
     except jwt.PyJWTError:
         # A fixed message: the library's text says why a token failed,

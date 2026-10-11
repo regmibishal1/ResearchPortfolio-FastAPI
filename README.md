@@ -37,7 +37,7 @@ The 2026 tournament ended on July 19, and the last snapshot was ingested that da
 
 - **API key** (`X-API-Key` header): lightweight gate on public demo endpoints to deter bot abuse; rate limiting and CORS provide the real protection.
 - **Admin bearer token**: internal pipeline operations only, never exposed to the browser.
-- **JWT bearer** (HS256, issued by the AuthAPI): available for user-scoped endpoints via `src/dependency.py`.
+- **JWT bearer** (HMAC with the shared secret, HS256, HS384 or HS512, issued by the AuthAPI): available for user-scoped endpoints via `src/dependency.py`.
 - **Admin role** (`has_admin_role`): an AuthAPI access token whose `role` claim is `ADMIN`, plus the API key. Used by the site's admin dashboard; answers are `Cache-Control: no-store`.
 
 ## Stack
