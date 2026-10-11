@@ -59,11 +59,17 @@ def test_health_counts_requests_by_route_but_not_health_probes():
     client.get("/health")
     _get("/stats/sample")  # 405: a GET on a POST route
     _get("/no/such/path")
+    _get("/stocks/company/AAPL")  # 503 without a database
+    _get("/manage/worldcup/runs", _token(role="ADMIN"))
     data = _get("/manage/health", _token(role="ADMIN")).json()
     assert data["last_hour"]["client_errors"] >= 2
     routes = {r["route"] for r in data["busiest_routes"]}
     assert "/health" not in routes
     assert "unmatched" in routes
+    # Full paths with their prefix, and parameters as names, never values.
+    assert "/manage/worldcup/runs" in routes
+    assert "/stocks/company/{ticker}" in routes
+    assert not any("AAPL" in r for r in routes)
     assert len(data["hourly"]) == 24
 
 

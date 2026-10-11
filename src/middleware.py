@@ -28,9 +28,19 @@ _HEALTH_LOG_LEVEL = logging.DEBUG
 
 
 def _route_of(request: Request) -> str:
-    """The route template ("/stocks/company/{ticker}"), so counts never key on raw values."""
-    route = request.scope.get("route")
-    return getattr(route, "path", None) or "unmatched"
+    """
+    The route as a template ("/stocks/company/{ticker}"), so counts never key
+    on raw values. Built from the real path: the matched route's own path
+    leaves out the router prefix.
+    """
+    if request.scope.get("route") is None:
+        return "unmatched"
+    names = {str(value): name for name, value in request.path_params.items()}
+    segments = []
+    for segment in request.url.path.split("/"):
+        name = names.pop(segment, None)
+        segments.append("{" + name + "}" if name else segment)
+    return "/".join(segments)
 
 
 def _get_client_ip(request: Request) -> str:
