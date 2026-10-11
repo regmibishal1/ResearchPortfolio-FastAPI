@@ -111,3 +111,75 @@ def test_diff_lists_the_biggest_moves_first():
     assert rows[0].winner_change == 15.0
     japan = rows[-1]
     assert japan.winner_after is None and japan.winner_change == -1.0
+
+
+class _FakeRun:
+    as_of_date = "2026-07-04"
+    label = None
+
+
+class _FakeSession:
+    def __init__(self, found: bool):
+        self.found = found
+        self.statements = []
+        self.committed = False
+
+    async def get(self, model, run_id):
+        return _FakeRun() if self.found else None
+
+    async def execute(self, statement):
+        self.statements.append(statement)
+
+    async def commit(self):
+        self.committed = True
+
+
+def _with_writer(session: _FakeSession):
+    async def fake():
+        yield session
+    return fake
+
+
+def _delete(path: str, token: str | None = None):
+    headers = {"X-API-Key": API_KEY}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return client.delete(path, headers=headers)
+
+
+def test_deleting_a_run_needs_an_admin():
+    assert _delete("/manage/worldcup/runs/1").status_code in (401, 403)
+    assert _delete("/manage/worldcup/runs/1", _token(role="USER")).status_code == 403
+
+
+def test_deleting_without_a_writer_connection_returns_503():
+    assert _delete("/manage/stocks/runs/1", _token(role="ADMIN")).status_code == 503
+
+
+def test_deleting_a_missing_run_is_a_404_and_writes_nothing():
+    from src.database import get_writer_db
+
+    session = _FakeSession(found=False)
+    app.dependency_overrides[get_writer_db] = _with_writer(session)
+    try:
+        response = _delete("/manage/worldcup/runs/99", _token(role="ADMIN"))
+    finally:
+        app.dependency_overrides.clear()
+    assert response.status_code == 404
+    assert session.statements == [] and not session.committed
+
+
+def test_deleting_a_run_removes_it_in_one_statement():
+    from src.database import get_writer_db
+
+    session = _FakeSession(found=True)
+    app.dependency_overrides[get_writer_db] = _with_writer(session)
+    try:
+        response = _delete("/manage/worldcup/runs/7", _token(role="ADMIN", sub="bregmi"))
+    finally:
+        app.dependency_overrides.clear()
+    assert response.status_code == 204
+    assert response.headers["cache-control"] == "no-store"
+    assert len(session.statements) == 1
+    assert str(session.statements[0]).startswith("DELETE FROM worldcup.runs")
+    assert session.committed

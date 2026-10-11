@@ -2593,6 +2593,49 @@
         ]
       }
     },
+    "/manage/stocks/runs/{run_id}": {
+      "delete": {
+        "operationId": "delete_stocks_run_manage_stocks_runs__run_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Stocks Run",
+        "tags": [
+          "manage"
+        ]
+      }
+    },
     "/manage/worldcup/diff": {
       "get": {
         "operationId": "worldcup_diff_manage_worldcup_diff_get",
@@ -2680,6 +2723,49 @@
           }
         ],
         "summary": "Worldcup Runs",
+        "tags": [
+          "manage"
+        ]
+      }
+    },
+    "/manage/worldcup/runs/{run_id}": {
+      "delete": {
+        "operationId": "delete_worldcup_run_manage_worldcup_runs__run_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Worldcup Run",
         "tags": [
           "manage"
         ]

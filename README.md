@@ -28,6 +28,7 @@ To report a security problem privately, see [SECURITY.md](SECURITY.md).
 | GET | `/manage/worldcup/runs` | admin role | Every World Cup snapshot with its team count |
 | GET | `/manage/worldcup/diff?before=&after=` | admin role | How each team's winner and final odds moved between two snapshots |
 | GET | `/manage/stocks/runs` | admin role | Every stocks snapshot with its company count |
+| DELETE | `/manage/worldcup/runs/{run_id}`, `/manage/stocks/runs/{run_id}` | admin role | Delete a snapshot and everything in it (writer connection; logged with the admin's username; no undo) |
 
 ### World Cup routes are an archive
 

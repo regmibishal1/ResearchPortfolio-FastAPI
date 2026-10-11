@@ -48,8 +48,8 @@ def test_cors_refuses_other_headers_and_methods():
         "/stats/sample",
         headers={
             "Origin": ORIGIN,
-            "Access-Control-Request-Method": "DELETE",
-            "Access-Control-Request-Headers": "authorization",
+            "Access-Control-Request-Method": "PUT",
+            "Access-Control-Request-Headers": "x-forwarded-host",
         },
     )
     assert response.status_code == 400

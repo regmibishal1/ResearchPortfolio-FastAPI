@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import settings
-from src.endpoints import health, manage, stats, stocks, stocks_admin, worldcup, worldcup_admin
+from src.endpoints import health, manage, manage_delete, stats, stocks, stocks_admin, worldcup, worldcup_admin
 from src.dependency import (
     has_admin_access,
     has_admin_role,
@@ -35,7 +35,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
     allow_credentials=False,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "X-API-Key", "Authorization"],
     max_age=86400,
 )
@@ -105,6 +105,15 @@ app.include_router(
 # with role ADMIN, on top of the usual API key. Answers are never cached.
 app.include_router(
     manage.router,
+    prefix="/manage",
+    tags=["manage"],
+    dependencies=[Depends(has_api_key), Depends(has_admin_role), Depends(set_no_store)],
+)
+
+# Admin dashboard, deleting snapshots. Same gate as /manage, but a separate
+# router so only these routes get the writer connections.
+app.include_router(
+    manage_delete.router,
     prefix="/manage",
     tags=["manage"],
     dependencies=[Depends(has_api_key), Depends(has_admin_role), Depends(set_no_store)],
