@@ -74,6 +74,25 @@ async def has_access(credentials: HTTPAuthorizationCredentials = Depends(securit
     return payload
 
 
+async def has_admin_role(payload: dict = Depends(has_access)) -> dict:
+    """
+    An AuthAPI access token whose user has the ADMIN role, for the site's
+    admin dashboard. The role is read from the token, which the AuthAPI signs;
+    a role change reaches it on the user's next sign-in or token refresh.
+    """
+    if payload.get("role") != "ADMIN":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admins only",
+        )
+    return payload
+
+
+async def set_no_store(response: Response) -> None:
+    """Admin answers are never cached, by the browser or by Cloudflare."""
+    response.headers["Cache-Control"] = "no-store"
+
+
 async def has_api_key(api_key: str = Security(_api_key_header)) -> None:
     """
     Validates the X-API-Key header for public endpoints (e.g. /stats).

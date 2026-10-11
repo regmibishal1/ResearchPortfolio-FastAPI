@@ -24,6 +24,10 @@ To report a security problem privately, see [SECURITY.md](SECURITY.md).
 | GET | `/stocks/track-record` | API key | Realized walk-forward track record for the latest snapshot |
 | GET | `/stocks/history` | API key | A single run-level metric across snapshots |
 | POST | `/stocks/ingest` | admin bearer | Snapshot ingestion from the edgar-signals pipeline |
+| GET | `/manage/health` | admin role | Request counts by status and route for the last hour and day, plus recent server errors |
+| GET | `/manage/worldcup/runs` | admin role | Every World Cup snapshot with its team count |
+| GET | `/manage/worldcup/diff?before=&after=` | admin role | How each team's winner and final odds moved between two snapshots |
+| GET | `/manage/stocks/runs` | admin role | Every stocks snapshot with its company count |
 
 ### World Cup routes are an archive
 
@@ -34,6 +38,7 @@ The 2026 tournament ended on July 19, and the last snapshot was ingested that da
 - **API key** (`X-API-Key` header): lightweight gate on public demo endpoints to deter bot abuse; rate limiting and CORS provide the real protection.
 - **Admin bearer token**: internal pipeline operations only, never exposed to the browser.
 - **JWT bearer** (HS256, issued by the AuthAPI): available for user-scoped endpoints via `src/dependency.py`.
+- **Admin role** (`has_admin_role`): an AuthAPI access token whose `role` claim is `ADMIN`, plus the API key. Used by the site's admin dashboard; answers are `Cache-Control: no-store`.
 
 ## Stack
 
@@ -58,6 +63,7 @@ All configuration comes from environment variables. No secrets are committed to 
 | `CORS_ALLOWED_ORIGINS` | Comma-separated allowlist of frontend origins |
 | `DEBUG` | Any non-empty value enables debug logging and the interactive docs |
 | `WEB_CONCURRENCY` | Gunicorn worker count in the container (default 4) |
+| `RP_REQUEST_STATS_PATH` | Where the dashboard's request counts are kept (SQLite, shared by the workers); defaults to the system temp folder, so a restart starts them again |
 
 Endpoints degrade gracefully when optional configuration is absent: database-backed routes return `503` if their connection string is unset, so the service still runs in minimal environments.
 

@@ -376,6 +376,58 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HealthResponse": {
+        "properties": {
+          "busiest_routes": {
+            "items": {
+              "$ref": "#/components/schemas/RouteCounts"
+            },
+            "title": "Busiest Routes",
+            "type": "array"
+          },
+          "counting_since": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counting Since"
+          },
+          "hourly": {
+            "items": {
+              "$ref": "#/components/schemas/HourCounts"
+            },
+            "title": "Hourly",
+            "type": "array"
+          },
+          "last_day": {
+            "$ref": "#/components/schemas/StatusCounts"
+          },
+          "last_hour": {
+            "$ref": "#/components/schemas/StatusCounts"
+          },
+          "recent_errors": {
+            "items": {
+              "$ref": "#/components/schemas/ServerError"
+            },
+            "title": "Recent Errors",
+            "type": "array"
+          }
+        },
+        "required": [
+          "counting_since",
+          "last_hour",
+          "last_day",
+          "hourly",
+          "busiest_routes",
+          "recent_errors"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
       "HistogramBin": {
         "properties": {
           "bin_end": {
@@ -438,6 +490,34 @@
           "value"
         ],
         "title": "HistoryPoint",
+        "type": "object"
+      },
+      "HourCounts": {
+        "properties": {
+          "client_errors": {
+            "title": "Client Errors",
+            "type": "integer"
+          },
+          "hour_start": {
+            "title": "Hour Start",
+            "type": "integer"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "integer"
+          },
+          "server_errors": {
+            "title": "Server Errors",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "hour_start",
+          "ok",
+          "client_errors",
+          "server_errors"
+        ],
+        "title": "HourCounts",
         "type": "object"
       },
       "IngestBracket": {
@@ -1263,6 +1343,29 @@
         "title": "RetrospectiveResponse",
         "type": "object"
       },
+      "RouteCounts": {
+        "properties": {
+          "requests": {
+            "title": "Requests",
+            "type": "integer"
+          },
+          "route": {
+            "title": "Route",
+            "type": "string"
+          },
+          "server_errors": {
+            "title": "Server Errors",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "route",
+          "requests",
+          "server_errors"
+        ],
+        "title": "RouteCounts",
+        "type": "object"
+      },
       "SampleRequest": {
         "properties": {
           "distribution": {
@@ -1437,6 +1540,218 @@
           "mean_exret_63"
         ],
         "title": "SectorRow",
+        "type": "object"
+      },
+      "ServerError": {
+        "properties": {
+          "at": {
+            "title": "At",
+            "type": "number"
+          },
+          "method": {
+            "title": "Method",
+            "type": "string"
+          },
+          "ms": {
+            "title": "Ms",
+            "type": "number"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "route": {
+            "title": "Route",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "at",
+          "method",
+          "route",
+          "status",
+          "ms",
+          "request_id"
+        ],
+        "title": "ServerError",
+        "type": "object"
+      },
+      "StatusCounts": {
+        "properties": {
+          "client_errors": {
+            "title": "Client Errors",
+            "type": "integer"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "integer"
+          },
+          "redirects": {
+            "title": "Redirects",
+            "type": "integer"
+          },
+          "server_errors": {
+            "title": "Server Errors",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ok",
+          "redirects",
+          "client_errors",
+          "server_errors"
+        ],
+        "title": "StatusCounts",
+        "type": "object"
+      },
+      "StocksRunRow": {
+        "properties": {
+          "as_of_date": {
+            "format": "date",
+            "title": "As Of Date",
+            "type": "string"
+          },
+          "companies": {
+            "title": "Companies",
+            "type": "integer"
+          },
+          "end_date": {
+            "format": "date",
+            "title": "End Date",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "n_events": {
+            "title": "N Events",
+            "type": "integer"
+          },
+          "run_timestamp_utc": {
+            "format": "date-time",
+            "title": "Run Timestamp Utc",
+            "type": "string"
+          },
+          "start_date": {
+            "format": "date",
+            "title": "Start Date",
+            "type": "string"
+          },
+          "universe_size": {
+            "title": "Universe Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "as_of_date",
+          "label",
+          "universe_size",
+          "n_events",
+          "start_date",
+          "end_date",
+          "run_timestamp_utc",
+          "companies"
+        ],
+        "title": "StocksRunRow",
+        "type": "object"
+      },
+      "StocksRunsResponse": {
+        "properties": {
+          "runs": {
+            "items": {
+              "$ref": "#/components/schemas/StocksRunRow"
+            },
+            "title": "Runs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "runs"
+        ],
+        "title": "StocksRunsResponse",
+        "type": "object"
+      },
+      "TeamChange": {
+        "properties": {
+          "final_after": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final After"
+          },
+          "final_before": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Before"
+          },
+          "team": {
+            "title": "Team",
+            "type": "string"
+          },
+          "winner_after": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Winner After"
+          },
+          "winner_before": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Winner Before"
+          },
+          "winner_change": {
+            "title": "Winner Change",
+            "type": "number"
+          }
+        },
+        "required": [
+          "team",
+          "winner_before",
+          "winner_after",
+          "winner_change",
+          "final_before",
+          "final_after"
+        ],
+        "title": "TeamChange",
         "type": "object"
       },
       "TeamRow": {
@@ -1694,6 +2009,98 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "WorldCupDiffResponse": {
+        "properties": {
+          "after": {
+            "$ref": "#/components/schemas/WorldCupRunRow"
+          },
+          "before": {
+            "$ref": "#/components/schemas/WorldCupRunRow"
+          },
+          "teams": {
+            "items": {
+              "$ref": "#/components/schemas/TeamChange"
+            },
+            "title": "Teams",
+            "type": "array"
+          }
+        },
+        "required": [
+          "before",
+          "after",
+          "teams"
+        ],
+        "title": "WorldCupDiffResponse",
+        "type": "object"
+      },
+      "WorldCupRunRow": {
+        "properties": {
+          "as_of_date": {
+            "format": "date",
+            "title": "As Of Date",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "n_played_matches_locked": {
+            "title": "N Played Matches Locked",
+            "type": "integer"
+          },
+          "n_simulations": {
+            "title": "N Simulations",
+            "type": "integer"
+          },
+          "run_timestamp_utc": {
+            "format": "date-time",
+            "title": "Run Timestamp Utc",
+            "type": "string"
+          },
+          "teams": {
+            "title": "Teams",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "as_of_date",
+          "label",
+          "n_simulations",
+          "n_played_matches_locked",
+          "run_timestamp_utc",
+          "teams"
+        ],
+        "title": "WorldCupRunRow",
+        "type": "object"
+      },
+      "WorldCupRunsResponse": {
+        "properties": {
+          "runs": {
+            "items": {
+              "$ref": "#/components/schemas/WorldCupRunRow"
+            },
+            "title": "Runs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "runs"
+        ],
+        "title": "WorldCupRunsResponse",
         "type": "object"
       },
       "src__endpoints__stocks__HistoryResponse": {
@@ -2126,6 +2533,156 @@
           }
         },
         "summary": "Api Health"
+      }
+    },
+    "/manage/health": {
+      "get": {
+        "operationId": "health_manage_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Health",
+        "tags": [
+          "manage"
+        ]
+      }
+    },
+    "/manage/stocks/runs": {
+      "get": {
+        "operationId": "stocks_runs_manage_stocks_runs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StocksRunsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stocks Runs",
+        "tags": [
+          "manage"
+        ]
+      }
+    },
+    "/manage/worldcup/diff": {
+      "get": {
+        "operationId": "worldcup_diff_manage_worldcup_diff_get",
+        "parameters": [
+          {
+            "description": "Run id of the earlier snapshot",
+            "in": "query",
+            "name": "before",
+            "required": true,
+            "schema": {
+              "description": "Run id of the earlier snapshot",
+              "title": "Before",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Run id of the later snapshot",
+            "in": "query",
+            "name": "after",
+            "required": true,
+            "schema": {
+              "description": "Run id of the later snapshot",
+              "title": "After",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorldCupDiffResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Worldcup Diff",
+        "tags": [
+          "manage"
+        ]
+      }
+    },
+    "/manage/worldcup/runs": {
+      "get": {
+        "operationId": "worldcup_runs_manage_worldcup_runs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorldCupRunsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          },
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Worldcup Runs",
+        "tags": [
+          "manage"
+        ]
       }
     },
     "/stats/sample": {
