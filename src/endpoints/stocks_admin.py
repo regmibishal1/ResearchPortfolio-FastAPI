@@ -29,15 +29,16 @@ router = APIRouter()
 # ---------------------------------------------------------------------------
 class IngestRunMeta(BaseModel):
     as_of_date: date
-    label: str | None = None
+    label: str | None = Field(default=None, max_length=64)
     universe_size: int = Field(gt=0)
     n_events: int = Field(ge=0)
     start_date: date
     end_date: date
     run_timestamp_utc: datetime
     # Headline walk-forward evaluation numbers. Free-form so the report format
-    # can evolve without a migration; stored in the runs.metrics JSONB.
-    metrics: dict = {}
+    # can evolve without a migration; stored in the runs.metrics JSONB. Only
+    # numbers (or null): the read routes and /history treat them as floats.
+    metrics: dict[str, float | None] = {}
     metadata: dict = {}
 
 
@@ -94,8 +95,9 @@ async def ingest_snapshot(
 ):
     """Push an analysis snapshot into the stocks schema.
 
-    Idempotent: re-posting the same (as_of_date, label) upserts the run row
-    and replaces every satellite row inside one transaction.
+    Idempotent: re-posting the same (as_of_date, label), unlabeled included,
+    upserts the run row and replaces every satellite row inside one
+    transaction.
     """
     logger.info(
         "stocks ingest as_of=%s label=%s universe=%d companies=%d sectors=%d",

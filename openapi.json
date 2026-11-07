@@ -775,6 +775,7 @@
           "group_name": {
             "anyOf": [
               {
+                "maxLength": 2,
                 "type": "string"
               },
               {
@@ -1396,7 +1397,13 @@
           },
           "params": {
             "additionalProperties": {
+              "maximum": 1000000000.0,
+              "minimum": -1000000000.0,
               "type": "number"
+            },
+            "maxProperties": 4,
+            "propertyNames": {
+              "maxLength": 16
             },
             "title": "Params",
             "type": "object"
@@ -2173,7 +2180,14 @@
           },
           "metrics": {
             "additionalProperties": {
-              "type": "number"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             },
             "title": "Metrics",
             "type": "object"
@@ -2263,6 +2277,7 @@
           "label": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -2278,7 +2293,16 @@
             "type": "object"
           },
           "metrics": {
-            "additionalProperties": true,
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
             "default": {},
             "title": "Metrics",
             "type": "object"
@@ -2456,6 +2480,7 @@
           "label": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -2487,6 +2512,8 @@
           },
           "tournament_key": {
             "default": "2026",
+            "maxLength": 16,
+            "minLength": 1,
             "title": "Tournament Key",
             "type": "string"
           }
@@ -3005,7 +3032,7 @@
     },
     "/stocks/ingest": {
       "post": {
-        "description": "Push an analysis snapshot into the stocks schema.\n\nIdempotent: re-posting the same (as_of_date, label) upserts the run row\nand replaces every satellite row inside one transaction.",
+        "description": "Push an analysis snapshot into the stocks schema.\n\nIdempotent: re-posting the same (as_of_date, label), unlabeled included,\nupserts the run row and replaces every satellite row inside one\ntransaction.",
         "operationId": "ingest_snapshot_stocks_ingest_post",
         "requestBody": {
           "content": {

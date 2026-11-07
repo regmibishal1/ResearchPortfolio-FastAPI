@@ -4,6 +4,7 @@ from fastapi import HTTPException, Depends, Security, status, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, APIKeyHeader
 import os
 import base64
+import binascii
 import hmac
 
 # Cache policy for the public read-only data (World Cup and stocks). Each
@@ -35,6 +36,10 @@ ADMIN_TOKEN_ENV = "RP_ADMIN_TOKEN"
 # For real protection rely on CORS + Cloudflare rate limiting.
 API_KEY_ENV = "RP_FASTAPI_API_KEY"
 
+# HS256 needs at least a 256-bit key; anything shorter is a broken setting,
+# and an empty one would let anyone sign tokens.
+MIN_JWT_SECRET_BYTES = 32
+
 security = HTTPBearer()
 _api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
@@ -46,18 +51,14 @@ async def has_access(credentials: HTTPAuthorizationCredentials = Depends(securit
     refresh token cannot stand in for one.
     """
     token = credentials.credentials
-
-    api_secret = os.getenv(JWT_SECRET_ENV)
-    if api_secret is None:
+    api_secret_bytes = jwt_secret_bytes()
+    if api_secret_bytes is None:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="JWT secret not configured"
         )
 
     try:
-        # Decode the base64-encoded secret key into bytes
-        api_secret_bytes = base64.b64decode(api_secret)
-
         # The AuthAPI's JWT library picks the HMAC size from the key length
         # (a 64-byte secret signs HS512), so accept the HMAC family. All
         # three use the shared secret; nothing else is accepted.
@@ -75,6 +76,25 @@ async def has_access(credentials: HTTPAuthorizationCredentials = Depends(securit
             detail="Invalid or expired token",
         )
     return payload
+
+
+def jwt_secret_bytes() -> bytes | None:
+    """The shared signing key, or None when it is unset, not valid base64, or
+    too short to be safe."""
+    api_secret = os.getenv(JWT_SECRET_ENV)
+    if not api_secret:
+        return None
+    try:
+        key = base64.b64decode(api_secret.strip(), validate=True)
+    except (binascii.Error, ValueError):
+        return None
+    return key if len(key) >= MIN_JWT_SECRET_BYTES else None
+
+
+def _same(given: str, expected: str) -> bool:
+    """Constant-time comparison on bytes; a non-ASCII header value is simply
+    a mismatch instead of a TypeError."""
+    return hmac.compare_digest(given.encode(), expected.encode())
 
 
 async def has_admin_role(payload: dict = Depends(has_access)) -> dict:
@@ -103,12 +123,12 @@ async def has_api_key(api_key: str = Security(_api_key_header)) -> None:
     env vars. Uses constant-time comparison to prevent timing attacks.
     """
     expected = os.getenv(API_KEY_ENV)
-    if expected is None:
+    if not expected:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="API key not configured on server",
         )
-    if not hmac.compare_digest(api_key, expected):
+    if not _same(api_key, expected):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid API key",
@@ -122,13 +142,13 @@ async def has_admin_access(credentials: HTTPAuthorizationCredentials = Depends(s
     this token is never issued to the UI.
     """
     admin_token = os.getenv(ADMIN_TOKEN_ENV)
-    if admin_token is None:
+    if not admin_token:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Admin token not configured"
         )
 
-    if not hmac.compare_digest(credentials.credentials, admin_token):
+    if not _same(credentials.credentials, admin_token):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid admin token"
