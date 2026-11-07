@@ -3,9 +3,10 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 COPY src ./src
-# Alembic migrations live alongside the app so `docker compose run --rm fastapi alembic upgrade head`
-# works inside the deployed container. The runtime container itself never invokes alembic; migrations
-# are run as an explicit operator step during deployment.
+# Alembic migrations live alongside the app so they run inside the deployed image, as an explicit
+# operator step with a privileged URL (the service's own DATABASE_URL is read-only):
+#   docker compose run --rm -e MIGRATION_DATABASE_URL=<admin url> fastapi alembic upgrade head
+# The runtime container itself never invokes alembic.
 COPY alembic ./alembic
 COPY alembic.ini .
 # Run as an unprivileged user.

@@ -5,9 +5,15 @@ database (health, stats sampler) still work in dev environments without
 Postgres running. The engine is created lazily so import-time failures don't
 take down the whole app.
 
-Every engine sets pool_pre_ping so pooled connections are revalidated before
-use; a Postgres restart otherwise leaves dead connections in the pool and the
-next request on each one fails with "connection is closed".
+Every engine comes from _make_engine:
+  - pool_pre_ping revalidates pooled connections before use; a Postgres
+    restart otherwise leaves dead connections in the pool and the next
+    request on each one fails with "connection is closed".
+  - Short connect, pool and statement timeouts, so a stalled Postgres (for
+    example one waiting on a migration lock) fails requests in seconds
+    instead of holding them for half a minute.
+  - hide_parameters keeps bound values (payload rows) out of error messages,
+    which end up in the logs.
 """
 
 from collections.abc import AsyncGenerator
@@ -16,6 +22,26 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from src.config import settings
+
+# Seconds. Writers get longer statements: an ingest replaces a whole run.
+CONNECT_TIMEOUT = 5
+POOL_TIMEOUT = 5
+READ_STATEMENT_TIMEOUT = 15
+WRITE_STATEMENT_TIMEOUT = 60
+
+
+def _make_engine(url: str, statement_timeout: int = READ_STATEMENT_TIMEOUT):
+    return create_async_engine(
+        url,
+        echo=False,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=5,
+        pool_timeout=POOL_TIMEOUT,
+        hide_parameters=True,
+        connect_args={"timeout": CONNECT_TIMEOUT, "command_timeout": statement_timeout},
+    )
+
 
 # Module-level engines are created on first access so a missing DATABASE_URL
 # or WORLDCUP_DB_WRITER_URL only blocks the routes that actually need them,
@@ -37,9 +63,7 @@ def _engine():
             raise RuntimeError(
                 "DATABASE_URL is not set; database-backed endpoints are disabled."
             )
-        _cached_engine = create_async_engine(
-            settings.database_url, echo=False, pool_pre_ping=True
-        )
+        _cached_engine = _make_engine(settings.database_url)
         _cached_session_factory = async_sessionmaker(
             _cached_engine, class_=AsyncSession, expire_on_commit=False
         )
@@ -73,8 +97,8 @@ def _writer_engine():
             raise RuntimeError(
                 "WORLDCUP_DB_WRITER_URL is not set; ingest is disabled."
             )
-        _cached_writer_engine = create_async_engine(
-            settings.worldcup_db_writer_url, echo=False, pool_pre_ping=True
+        _cached_writer_engine = _make_engine(
+            settings.worldcup_db_writer_url, WRITE_STATEMENT_TIMEOUT
         )
         _cached_writer_session_factory = async_sessionmaker(
             _cached_writer_engine, class_=AsyncSession, expire_on_commit=False
@@ -106,9 +130,7 @@ def _stocks_reader_engine():
             raise RuntimeError(
                 "No stocks reader connection is set; stocks endpoints are disabled."
             )
-        _cached_stocks_reader_engine = create_async_engine(
-            settings.stocks_reader_url, echo=False, pool_pre_ping=True
-        )
+        _cached_stocks_reader_engine = _make_engine(settings.stocks_reader_url)
         _cached_stocks_reader_session_factory = async_sessionmaker(
             _cached_stocks_reader_engine, class_=AsyncSession, expire_on_commit=False
         )
@@ -137,8 +159,8 @@ def _stocks_writer_engine():
             raise RuntimeError(
                 "STOCKS_DB_WRITER_URL is not set; stocks ingest is disabled."
             )
-        _cached_stocks_writer_engine = create_async_engine(
-            settings.stocks_db_writer_url, echo=False, pool_pre_ping=True
+        _cached_stocks_writer_engine = _make_engine(
+            settings.stocks_db_writer_url, WRITE_STATEMENT_TIMEOUT
         )
         _cached_stocks_writer_session_factory = async_sessionmaker(
             _cached_stocks_writer_engine, class_=AsyncSession, expire_on_commit=False

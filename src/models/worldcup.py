@@ -40,6 +40,7 @@ class WorldCupRun(Base):
         UniqueConstraint(
             "tournament_key", "as_of_date", "label",
             name="uq_worldcup_runs_tournament_date_label",
+            postgresql_nulls_not_distinct=True,
         ),
         Index(
             "ix_worldcup_runs_tournament_as_of_date",
