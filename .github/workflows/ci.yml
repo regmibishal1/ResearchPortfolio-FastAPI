@@ -5,12 +5,19 @@ on:
     branches: [main]
   pull_request:
 
+# Read-only token, and no credentials left in the checkout, so a package's
+# install code cannot push to the repository.
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@v7
         with:
@@ -22,7 +29,7 @@ jobs:
 
       - name: Audit dependencies for known vulnerabilities
         run: |
-          pip install pip-audit
+          pip install --require-hashes -r requirements-audit.txt
           pip-audit --strict -r requirements.txt -r requirements-dev.txt
 
       - name: Run tests

@@ -62,7 +62,7 @@ All configuration comes from environment variables. No secrets are committed to 
 | `RP_ADMIN_TOKEN` | Bearer token for admin-only operations |
 | `RP_FASTAPI_API_KEY` | API key required by demo endpoints |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated allowlist of frontend origins |
-| `DEBUG` | Any non-empty value enables debug logging and the interactive docs |
+| `DEBUG` | `1` or `true` enables debug logging and the interactive docs; unset, empty, `0`, `false`, `no` or `off` leaves them off |
 | `WEB_CONCURRENCY` | Gunicorn worker count in the container (default 4) |
 | `RP_REQUEST_STATS_PATH` | Where the dashboard's request counts are kept (SQLite, shared by the workers); defaults to the system temp folder, so a restart starts them again |
 
@@ -91,9 +91,10 @@ Interactive API docs (`/docs`, `/redoc`, `/openapi.json`) are served only when `
 pip install pip-tools
 pip-compile --generate-hashes --allow-unsafe --strip-extras requirements.in
 pip-compile --generate-hashes --allow-unsafe --strip-extras requirements-dev.in
+pip-compile --generate-hashes --allow-unsafe --strip-extras requirements-audit.in
 ```
 
-CI runs `pip-audit` against both files, and Dependabot proposes monthly updates.
+CI installs `pip-audit` from `requirements-audit.txt` and runs it against the app and test files, and Dependabot proposes monthly updates.
 
 ### API schema
 

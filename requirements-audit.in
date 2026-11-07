@@ -1,0 +1,3 @@
+# The CI vulnerability audit tool, kept separate from the app and test
+# dependencies but installed with hashes like them.
+pip-audit

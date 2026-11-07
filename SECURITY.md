@@ -19,7 +19,8 @@ came back.
 ## What the API does with data
 
 - It serves public, read-only data: the World Cup 2026 archive, the stocks signals behind
-  a hidden page, and a statistics sampler. It stores nothing about the people who call it.
+  a hidden page, and a statistics sampler. It keeps no accounts or profiles of the people who
+  call it; the request log below is the only record of a call.
 - The `X-API-Key` header is not a secret: the key ships in the site's public code and only
   keeps casual bots out. Cloudflare rate limiting and CORS do the real work.
 - New data is written only through the ingest routes, which need an admin token that never
