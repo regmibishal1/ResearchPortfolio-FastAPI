@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import Literal
+from typing import Annotated, Literal
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -10,10 +10,14 @@ router = APIRouter()
 
 DISTRIBUTIONS = Literal["normal", "uniform", "exponential", "beta", "binomial", "poisson"]
 
+# Finite and within a range numpy samples without overflowing. Every
+# distribution takes at most two parameters.
+ParamValue = Annotated[float, Field(allow_inf_nan=False, ge=-1e9, le=1e9)]
+
 
 class SampleRequest(BaseModel):
     distribution: DISTRIBUTIONS
-    params: dict[str, float]
+    params: dict[Annotated[str, Field(max_length=16)], ParamValue] = Field(max_length=4)
     n_samples: int = Field(default=1000, ge=100, le=10000)
     n_bins: int = Field(default=40, ge=5, le=100)
 
@@ -87,14 +91,17 @@ async def sample_distribution(request: SampleRequest):
     Sample from a statistical distribution and return histogram bins + summary
     stats. Gated by the shared API key (see src/main.py router mount).
     """
+    # The parameter names are the caller's own text, so they stay out of the log.
     logger.info(
-        "sample_distribution distribution=%s n=%d bins=%d params=%s",
+        "sample_distribution distribution=%s n=%d bins=%d",
         request.distribution,
         request.n_samples,
         request.n_bins,
-        request.params,
     )
-    samples = _generate(request.distribution, request.params, request.n_samples)
+    try:
+        samples = _generate(request.distribution, request.params, request.n_samples)
+    except (ValueError, OverflowError):
+        raise HTTPException(400, "Those parameters are out of range for this distribution")
 
     counts, edges = np.histogram(samples, bins=request.n_bins)
     total = counts.sum()

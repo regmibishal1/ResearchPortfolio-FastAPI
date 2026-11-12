@@ -37,7 +37,11 @@ class StocksRun(Base):
 
     __tablename__ = "runs"
     __table_args__ = (
-        UniqueConstraint("as_of_date", "label", name="uq_stocks_runs_date_label"),
+        UniqueConstraint(
+            "as_of_date", "label",
+            name="uq_stocks_runs_date_label",
+            postgresql_nulls_not_distinct=True,
+        ),
         Index("ix_stocks_runs_as_of_date", "as_of_date"),
         CheckConstraint("universe_size > 0", name="ck_stocks_runs_universe_pos"),
         CheckConstraint("n_events >= 0", name="ck_stocks_runs_n_events_nonneg"),

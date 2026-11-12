@@ -1,11 +1,14 @@
 """Alembic environment for async SQLAlchemy migrations.
 
-`sqlalchemy.url` is injected from `src.config.settings.database_url` at
-runtime so the alembic.ini never stores a real connection string. The
-URL must use the `postgresql+asyncpg://` driver in async mode.
+`sqlalchemy.url` is injected at runtime so the alembic.ini never stores a
+real connection string: MIGRATION_DATABASE_URL when set, else DATABASE_URL.
+The service's own DATABASE_URL is a SELECT-only role, so migrations pass a
+privileged URL in MIGRATION_DATABASE_URL on the one-off run command. The URL
+must use the `postgresql+asyncpg://` driver in async mode.
 """
 
 import asyncio
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import pool
@@ -16,7 +19,10 @@ from src.config import settings
 from src.models import Base  # noqa: F401 - registers all models with metadata
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.database_url)
+migration_url = os.getenv("MIGRATION_DATABASE_URL") or settings.database_url
+# The config parser treats % as interpolation, which a percent-encoded
+# password would trip.
+config.set_main_option("sqlalchemy.url", migration_url.replace("%", "%%"))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

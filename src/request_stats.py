@@ -32,6 +32,9 @@ def _connect() -> sqlite3.Connection:
     if _conn is None:
         conn = sqlite3.connect(DB_PATH, timeout=2, isolation_level=None, check_same_thread=False)
         conn.execute("PRAGMA journal_mode=WAL")
+        # WAL with NORMAL still never corrupts the file; it only skips the
+        # fsync on every request, which this throwaway data does not need.
+        conn.execute("PRAGMA synchronous=NORMAL")
         conn.execute(
             "CREATE TABLE IF NOT EXISTS counts ("
             " minute INTEGER NOT NULL, route TEXT NOT NULL, status_class INTEGER NOT NULL,"
@@ -78,8 +81,33 @@ def record(method: str, route: str, status: int, ms: float, request_id: str, now
 
 
 def summary(now: float | None = None) -> dict:
-    """Totals for the last hour and day, an hourly series, busiest routes and recent errors."""
+    """Totals for the last hour and day, an hourly series, busiest routes and
+    recent errors. A locked or broken stats file reads as no traffic rather
+    than failing the dashboard."""
     now = time.time() if now is None else now
+    try:
+        return _summary(now)
+    except sqlite3.Error:
+        return _summary_of_nothing(now)
+
+
+def _summary_of_nothing(now: float) -> dict:
+    minute = int(now // 60)
+    empty = {f"{c}xx": 0 for c in (2, 3, 4, 5)}
+    return {
+        "counting_since": None,
+        "last_hour": dict(empty),
+        "last_day": dict(empty),
+        "hourly": [
+            {"hour_start": (minute - h * 60 - 59) * 60, "ok": 0, "client_errors": 0, "server_errors": 0}
+            for h in range(23, -1, -1)
+        ],
+        "busiest_routes": [],
+        "recent_errors": [],
+    }
+
+
+def _summary(now: float) -> dict:
     minute = int(now // 60)
     hour_ago, day_ago = minute - 60, minute - 24 * 60
     with _lock:

@@ -1,32 +1,61 @@
 import logging
+import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Depends
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from src.body_limit import BodySizeLimitMiddleware
 from src.config import settings
 from src.endpoints import health, manage, manage_delete, stats, stocks, stocks_admin, worldcup, worldcup_admin
 from src.dependency import (
+    ADMIN_TOKEN_ENV,
+    API_KEY_ENV,
     has_admin_access,
     has_admin_role,
     has_api_key,
     set_no_store,
     set_read_cache,
     set_worldcup_cache,
+    jwt_secret_bytes,
 )
 from src.logging_config import setup_logging
 from src.middleware import RequestLoggingMiddleware
+from src.validation_errors import validation_error_handler
 
 # Initialise structured logging before the app is created so that startup
 # messages (e.g. Uvicorn's "Application startup complete") are formatted too.
 setup_logging(level=logging.DEBUG if settings.debug else logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    # Checked at startup rather than import, so tests and the OpenAPI export
+    # still import the app without them. Logged, not fatal: /health and the
+    # public data keep working while a gated route answers 500.
+    if not os.getenv(API_KEY_ENV):
+        logger.error("Startup check: %s is not set; API-key routes will fail", API_KEY_ENV)
+    if not os.getenv(ADMIN_TOKEN_ENV):
+        logger.error("Startup check: %s is not set; admin routes will fail", ADMIN_TOKEN_ENV)
+    if jwt_secret_bytes() is None:
+        logger.error(
+            "Startup check: the JWT secret is missing, not base64, or under 32 bytes; "
+            "dashboard routes will fail"
+        )
+    yield
+
 
 # The interactive docs and the schema behind them are only served in debug,
 # so production does not publish a map of every route.
-docs_enabled = bool(settings.debug)
+docs_enabled = settings.debug
 app = FastAPI(
+    lifespan=lifespan,
     docs_url="/docs" if docs_enabled else None,
     redoc_url="/redoc" if docs_enabled else None,
     openapi_url="/openapi.json" if docs_enabled else None,
 )
+app.add_exception_handler(RequestValidationError, validation_error_handler)
 
 # The browser reads public data with an API key, and the admin dashboard also
 # sends its AuthAPI bearer token. No cookies or credentials, and only the
@@ -39,6 +68,9 @@ app.add_middleware(
     allow_headers=["Content-Type", "X-API-Key", "Authorization"],
     max_age=86400,
 )
+
+# Oversized bodies are turned away before any route parses them.
+app.add_middleware(BodySizeLimitMiddleware)
 
 # RequestLoggingMiddleware is added last so Starlette's LIFO ordering makes it
 # run outermost, it sees every request before CORS and every response after.

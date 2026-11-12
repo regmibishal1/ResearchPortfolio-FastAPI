@@ -5,7 +5,7 @@ without each one re-reading os.environ. Validates types on startup so a
 missing or malformed value fails fast instead of breaking at first use.
 """
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -45,8 +45,16 @@ class Settings(BaseSettings):
         default="http://localhost:4200", alias="CORS_ALLOWED_ORIGINS"
     )
 
-    # Debug toggle, any non-empty value flips logging to DEBUG.
-    debug: str = Field(default="", alias="DEBUG")
+    # Debug toggle: DEBUG=1 (or true/yes/on) turns on debug logging and the
+    # interactive docs; unset, empty, 0, false, no and off leave them off.
+    debug: bool = Field(default=False, alias="DEBUG")
+
+    @field_validator("debug", mode="before")
+    @classmethod
+    def _parse_debug(cls, value: object) -> bool:
+        if isinstance(value, bool):
+            return value
+        return str(value).strip().lower() not in {"", "0", "false", "no", "off"}
 
     @property
     def cors_origin_list(self) -> list[str]:

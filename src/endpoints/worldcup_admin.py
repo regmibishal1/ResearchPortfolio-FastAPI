@@ -28,9 +28,9 @@ router = APIRouter()
 # Payload schemas
 # ---------------------------------------------------------------------------
 class IngestRunMeta(BaseModel):
-    tournament_key: str = "2026"
+    tournament_key: str = Field(default="2026", min_length=1, max_length=16)
     as_of_date: date
-    label: str | None = None
+    label: str | None = Field(default=None, max_length=64)
     n_simulations: int = Field(gt=0)
     n_played_matches_locked: int = Field(ge=0)
     run_timestamp_utc: datetime
@@ -103,7 +103,7 @@ class IngestPlayedMatch(BaseModel):
     away_team: str = Field(min_length=1, max_length=64)
     home_score: int = Field(ge=0)
     away_score: int = Field(ge=0)
-    group_name: str | None = None
+    group_name: str | None = Field(default=None, max_length=2)
 
 
 class IngestPayload(BaseModel):

@@ -40,7 +40,7 @@ class RunMeta(BaseModel):
     start_date: date
     end_date: date
     run_timestamp_utc: datetime
-    metrics: dict[str, float]
+    metrics: dict[str, float | None]
 
 
 class SectorRow(BaseModel):

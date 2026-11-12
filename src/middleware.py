@@ -3,7 +3,7 @@ HTTP request/response logging middleware.
 
 Responsibilities:
   - Assign a short unique request ID to each request
-  - Extract the real client IP, trying CF-Connecting-IP, then X-Forwarded-For, then the socket
+  - Extract the real client IP, from CF-Connecting-IP or else the socket
   - Store both in ContextVars so all downstream loggers see them automatically
   - Log the incoming request and the outgoing response with elapsed time
   - Return X-Request-ID in the response header for end-to-end tracing
@@ -27,20 +27,32 @@ logger = logging.getLogger(__name__)
 _HEALTH_LOG_LEVEL = logging.DEBUG
 
 
+# Route templates are short; the cap only guards the stats table.
+_MAX_ROUTE_LENGTH = 200
+
+
 def _route_of(request: Request) -> str:
     """
     The route as a template ("/stocks/company/{ticker}"), so counts never key
-    on raw values. Built from the real path: the matched route's own path
-    leaves out the router prefix.
+    on raw values. The matched route's own path leaves out its router prefix,
+    so the prefix is what the decoded request path has in front of the route
+    filled in with its parameters. Prefixes are fixed strings, never caller
+    input; anything that does not line up counts as "unmatched".
     """
-    if request.scope.get("route") is None:
+    route = request.scope.get("route")
+    template = getattr(route, "path", None)
+    path_format = getattr(route, "path_format", None)
+    if not isinstance(template, str) or not isinstance(path_format, str):
         return "unmatched"
-    names = {str(value): name for name, value in request.path_params.items()}
-    segments = []
-    for segment in request.url.path.split("/"):
-        name = names.pop(segment, None)
-        segments.append("{" + name + "}" if name else segment)
-    return "/".join(segments)
+    try:
+        filled = path_format.format(**{k: str(v) for k, v in request.path_params.items()})
+    except (KeyError, IndexError, ValueError):
+        return "unmatched"
+    full_path = request.scope.get("path", "")
+    if not full_path.endswith(filled):
+        return "unmatched"
+    prefix = full_path[: len(full_path) - len(filled)]
+    return (prefix + template)[:_MAX_ROUTE_LENGTH]
 
 
 def _get_client_ip(request: Request) -> str:
@@ -48,19 +60,14 @@ def _get_client_ip(request: Request) -> str:
     Resolve the real originating IP for a request.
 
     Priority:
-      1. CF-Connecting-IP, set by Cloudflare Tunnel; cannot be spoofed
-         because the Tunnel terminates TLS before passing the request to us.
-      2. X-Forwarded-For, leftmost entry, used as fallback for local dev
-         traffic that doesn't go through Cloudflare.
-      3. Socket remote host, last-resort fallback (local direct connections).
+      1. CF-Connecting-IP, set by Cloudflare Tunnel, which overwrites any
+         value the visitor sent.
+      2. Socket remote host, for direct connections (local dev, the LAN
+         port). X-Forwarded-For is not used: any caller can set it.
     """
     cf_ip = request.headers.get("CF-Connecting-IP")
     if cf_ip:
         return cf_ip.strip()
-
-    xff = request.headers.get("X-Forwarded-For")
-    if xff:
-        return xff.split(",")[0].strip()
 
     return request.client.host if request.client else "unknown"
 
