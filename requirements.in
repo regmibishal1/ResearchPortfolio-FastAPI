@@ -5,7 +5,7 @@ fastapi
 uvicorn[standard]
 gunicorn
 # 2.1 changes async session behavior; move deliberately, with DB tests.
-sqlalchemy[asyncio]>=2.0,<2.1
+sqlalchemy[asyncio]>=2.1.6,<2.2
 asyncpg
 alembic
 pydantic-settings
